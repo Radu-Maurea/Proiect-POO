@@ -1,4 +1,17 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿using System;
+using System.Windows.Forms;
 
-Console.WriteLine("Hello, World!");
-Console.WriteLine("Radu");
+namespace Proiect
+{
+    static class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainForm());
+        }
+    }
+}

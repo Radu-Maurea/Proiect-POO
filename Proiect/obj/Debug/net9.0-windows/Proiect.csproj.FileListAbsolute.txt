@@ -1,0 +1,15 @@
+F:\info\an_2\Proiect POO\Proiect\Proiect\bin\Debug\net9.0-windows\Proiect.exe
+F:\info\an_2\Proiect POO\Proiect\Proiect\bin\Debug\net9.0-windows\Proiect.deps.json
+F:\info\an_2\Proiect POO\Proiect\Proiect\bin\Debug\net9.0-windows\Proiect.runtimeconfig.json
+F:\info\an_2\Proiect POO\Proiect\Proiect\bin\Debug\net9.0-windows\Proiect.dll
+F:\info\an_2\Proiect POO\Proiect\Proiect\bin\Debug\net9.0-windows\Proiect.pdb
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.GeneratedMSBuildEditorConfig.editorconfig
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.AssemblyInfoInputs.cache
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.AssemblyInfo.cs
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.csproj.CoreCompileInputs.cache
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.sourcelink.json
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.dll
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\refint\Proiect.dll
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.pdb
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\Proiect.genruntimeconfig.cache
+F:\info\an_2\Proiect POO\Proiect\Proiect\obj\Debug\net9.0-windows\ref\Proiect.dll

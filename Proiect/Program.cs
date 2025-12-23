@@ -5,7 +5,6 @@ namespace Proiect
 {
     static class Program
     {
-        [STAThread]
         static void Main()
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -13,5 +12,6 @@ namespace Proiect
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
         }
+
     }
-}
+} 

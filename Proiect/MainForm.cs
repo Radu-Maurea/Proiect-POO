@@ -1,67 +1,113 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace Proiect
 {
+    //Clinica clinica = new Clinica();
     public class MainForm : Form
     {
+        private Clinica clinica = new Clinica();
+
         private TextBox txtEmail;
         private TextBox txtPassword;
-        private Button btnAddAdmin;
-        private ListBox lstAdmins;
-
-        private List<Admin> admins = new List<Admin>();
+        private Button btnLogin;
+        private Button btnSignup;
 
         public MainForm()
         {
-            this.Text = "Clinic Admin Management";
-            this.Width = 400;
-            this.Height = 300;
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            this.Text = "Clinic Authentication";
+            this.Width = 350;
+            this.Height = 230;
+            this.StartPosition = FormStartPosition.CenterScreen;
 
             // Email
-            var lblEmail = new Label { Left = 20, Top = 20, Text = "Email:" };
-            txtEmail = new TextBox { Left = 100, Top = 20, Width = 200 };
+            var lblEmail = new Label
+            {
+                Left = 30,
+                Top = 30,
+                Text = "Email:",
+                AutoSize = true
+            };
+
+            txtEmail = new TextBox
+            {
+                Left = 100,
+                Top = 25,
+                Width = 200
+            };
 
             // Password
-            var lblPassword = new Label { Left = 20, Top = 60, Text = "Password:" };
-            txtPassword = new TextBox { Left = 100, Top = 60, Width = 200 };
+            var lblPassword = new Label
+            {
+                Left = 30,
+                Top = 70,
+                Text = "Password:",
+                AutoSize = true
+            };
 
-            // Button
-            btnAddAdmin = new Button { Left = 100, Top = 100, Text = "Add Admin" };
-            btnAddAdmin.Click += BtnAddAdmin_Click;
+            txtPassword = new TextBox
+            {
+                Left = 100,
+                Top = 65,
+                Width = 200,
+                UseSystemPasswordChar = true
+            };
 
-            // List of Adminse
-            lstAdmins = new ListBox { Left = 20, Top = 140, Width = 340, Height = 100 };
+            // Login button
+            btnLogin = new Button
+            {
+                Left = 50,
+                Top = 120,
+                Width = 100,
+                Text = "Login"
+            };
+            btnLogin.Click += BtnLogin_Click;
 
-            // Add controls to form
+            // Sign Up button
+            btnSignup = new Button
+            {
+                Left = 180,
+                Top = 120,
+                Width = 100,
+                Text = "Sign Up"
+            };
+            btnSignup.Click += BtnSignup_Click;
+
+            // Add controls
             this.Controls.Add(lblEmail);
             this.Controls.Add(txtEmail);
             this.Controls.Add(lblPassword);
             this.Controls.Add(txtPassword);
-            this.Controls.Add(btnAddAdmin);
-            this.Controls.Add(lstAdmins);
+            this.Controls.Add(btnLogin);
+            this.Controls.Add(btnSignup);
         }
 
-        private void BtnAddAdmin_Click(object? sender, EventArgs e)
+        private void BtnLogin_Click(object sender, EventArgs e)
         {
-            var email = txtEmail.Text;
-            var password = txtPassword.Text;
+            string email = txtEmail.Text;
+            string password = txtPassword.Text;
 
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                MessageBox.Show("Please enter both email and password.");
+                MessageBox.Show("Please enter email and password.");
                 return;
             }
 
-            var admin = new Admin(email, password);
-            admins.Add(admin);
+            // TODO: verificare login
+            MessageBox.Show("Login successful (demo).");
+        }
 
-            lstAdmins.Items.Add($"{admin.Email} (ID: {admin.Id})");
-
-            // Clear inputs
-            txtEmail.Text = "";
-            txtPassword.Text = "";
+        private void BtnSignup_Click(object sender, EventArgs e)
+        {
+            using (var signupForm = new SignupForm(clinica))
+            {
+                signupForm.ShowDialog();
+            }
         }
     }
 }

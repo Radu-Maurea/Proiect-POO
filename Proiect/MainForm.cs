@@ -98,8 +98,22 @@ namespace Proiect
                 return;
             }
 
-            // TODO: verificare login
-            MessageBox.Show("Login successful (demo).");
+            if (clinica.VerificareLogin(email, password))
+            {
+                User userLogat = clinica.GetUserLogin(email, password);
+                MessageBox.Show($"Welcome {userLogat.Email}!");
+                this.Hide();
+                if (userLogat is Admin)
+                {
+                    AdminForm adminForm = new AdminForm(clinica,(Admin)userLogat);
+                    adminForm.ShowDialog();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Login failed!");
+                this.Close();
+            }
         }
 
         private void BtnSignup_Click(object sender, EventArgs e)

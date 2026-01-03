@@ -1,0 +1,14 @@
+[
+  {
+    "$type": "Admin",
+    "Id": "fd7e4c72-6408-4b97-a3f3-3be84c14a55f",
+    "Email": "oli\u003C3",
+    "Password": "radu\u002Boli"
+  },
+  {
+    "$type": "Medic",
+    "Id": "0d48c5dc-f9a6-40c7-89ed-274897f59ff6",
+    "Email": "edi",
+    "Password": "parola"
+  }
+]

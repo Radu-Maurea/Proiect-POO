@@ -1,23 +1,10 @@
 ﻿namespace Proiect
 {
-    public class Specialitate
-    {
-        public string Nume { get; set; }
-
-        public Specialitate(string nume)
-        {
-            Nume = nume;
-        }
-
-        public override string ToString()
-        {
-            return Nume;
-        }
-    }
+  
 
     public class Medic : User
     {
-        public Specialitate Specialitate { get; private set; }
+        public string Specialitate { get; private set; }
         public string ProgramLucru { get; private set; }
 
         public Medic(string email, string password) : base(email,password) { }
@@ -34,7 +21,7 @@
                 Console.WriteLine(pacient.ToString());
             }
         }
-        public void SetSpecialitate(Specialitate specialitate)
+        public void SetSpecialitate(string specialitate)
         {
             Specialitate = specialitate;
         }

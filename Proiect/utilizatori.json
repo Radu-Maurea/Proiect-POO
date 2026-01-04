@@ -21,24 +21,8 @@
     "$type": "Medic",
     "Specialitate": null,
     "ProgramLucru": null,
-    "Id": "297edcac-7619-4f5b-8a1c-6d721cb0928e",
-    "Email": "Olivia Bako",
-    "Password": "123"
-  },
-  {
-    "$type": "Medic",
-    "Specialitate": null,
-    "ProgramLucru": null,
-    "Id": "254e7ad3-232c-4074-ad48-e54bd9fb5a0b",
-    "Email": "Mihai",
-    "Password": "qq"
-  },
-  {
-    "$type": "Medic",
-    "Specialitate": null,
-    "ProgramLucru": null,
-    "Id": "3c8995d5-9281-48bd-8184-f707bc0c48a6",
-    "Email": "Paul",
-    "Password": "8899"
+    "Id": "95b010a1-8675-43a0-9547-2ed28e14589b",
+    "Email": "1",
+    "Password": "1"
   }
 ]

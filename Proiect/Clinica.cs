@@ -46,7 +46,7 @@ namespace Proiect;
             return false;
         }
 
-        private void SalvareInFisier()
+        public void SalvareInFisier()
         {
             try
             {

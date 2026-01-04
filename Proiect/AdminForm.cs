@@ -19,6 +19,7 @@ public class AdminForm : Form
     private TextBox txtAdaugPass;
     private ComboBox cmbSpecializari;
     private ComboBox cmbProgram;
+    private ComboBox cmbMedici;
     // Controale specifice pentru TAB-ul de STERGERE
     private TextBox txtStergeEmail;
 
@@ -31,6 +32,8 @@ public class AdminForm : Form
 
     public void InitializeUI()
     {
+        admin.SetClinica(clinica);
+        
         this.Text = "Admin Panel";
         this.Width = 600; 
         this.Height = 450;
@@ -156,12 +159,9 @@ public class AdminForm : Form
             MessageBox.Show("Eroare: Acest email este deja înregistrat!");
             return;
         }
-
-        Medic medicNou = new Medic(email, pass);
-        medicNou.SetSpecialitate(new Specialitate(cmbSpecializari.SelectedItem.ToString()));
-        medicNou.SetProgram(cmbProgram.SelectedItem.ToString());
-        clinica.AdaugaUtilizator(medicNou);
-        MessageBox.Show("Medic adăugat cu succes!");
+        bool succes = admin.AdaugaMedic(email, pass, cmbSpecializari.SelectedItem.ToString(), cmbProgram.SelectedItem.ToString());
+        if (succes)
+            MessageBox.Show("Medic adăugat cu succes!");
         
         txtAdaugEmail.Clear();
         txtAdaugPass.Clear();
@@ -191,15 +191,18 @@ public class AdminForm : Form
             MessageBox.Show("Introduceți email-ul medicului pentru ștergere.");
             return;
         }
-
-        bool succes = clinica.StergeUtilizatorDupaEmail(email); //
-        if (succes) {
-            MessageBox.Show("Utilizatorul a fost eliminat definitiv.");
+        bool succes = admin.StergeMedic(email);
+        if (succes)
+        {
+            MessageBox.Show("Medicul a fost eliminat definitiv.");
             txtStergeEmail.Clear();
             btnAfisare_Click(null, null);
-        } else {
-            MessageBox.Show("Eroare: Medicul nu a fost găsit.");
         }
+        else
+        {
+            MessageBox.Show("Eroare:Medicul nu a fost gasit");
+        }
+        
     }
 
     private void btnAfisare_Click(object sender, EventArgs e)
@@ -215,6 +218,10 @@ public class AdminForm : Form
         }
     }
 
+    private void btnModifica_Click(object sender, EventArgs e)
+    {
+        
+    }
     private void btnLogout_Click(object sender, EventArgs e)
     {
         this.Hide();
@@ -222,4 +229,5 @@ public class AdminForm : Form
         mainForm.Show();
         this.Close();
     }
+    
 }

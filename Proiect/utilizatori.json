@@ -19,10 +19,18 @@
   },
   {
     "$type": "Medic",
-    "Specialitate": null,
-    "ProgramLucru": null,
+    "Specialitate": "Dermatologie",
+    "ProgramLucru": "10:00 - 18:00",
     "Id": "95b010a1-8675-43a0-9547-2ed28e14589b",
     "Email": "1",
     "Password": "1"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": "Pediatrie",
+    "ProgramLucru": "12:00-06:00",
+    "Id": "d4348792-00de-423c-83b9-8bf7849bcbe7",
+    "Email": "Oiubescpeoli",
+    "Password": "123"
   }
 ]

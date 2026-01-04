@@ -41,4 +41,21 @@ public class Admin : User
         }
         return false;
     }
+
+    public bool ModificaMedic(string email, string specialitate, string programLucru)
+    {
+        var medic = clinica.utilizatori.OfType<Medic>().FirstOrDefault(m => m.Email.Trim().ToLower() == email.Trim().ToLower());
+        if (medic != null)
+        {
+            medic.SetSpecialitate(specialitate);
+            medic.SetProgram(programLucru);
+            
+            clinica.SalvareInFisier();
+            return true;
+        }
+
+        return false;
+    }
+    
+    
 }

@@ -104,4 +104,7 @@ namespace Proiect;
     
             return false;
         }
+        
+        public List<Medic> Medici => utilizatori.Where(u => u is Medic).Cast<Medic>().ToList();
     }
+

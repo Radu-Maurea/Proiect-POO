@@ -6,15 +6,39 @@
     "Password": "radu\u002Boli"
   },
   {
-    "$type": "Medic",
-    "Id": "0d48c5dc-f9a6-40c7-89ed-274897f59ff6",
-    "Email": "edi",
-    "Password": "parola"
-  },
-  {
     "$type": "Pacient",
     "Id": "48736daf-0416-45ac-8d75-fe864890a8ad",
     "Email": "radu",
     "Password": "123"
+  },
+  {
+    "$type": "Admin",
+    "Id": "ee42a6d9-1eb6-4cb7-b193-653e87755c27",
+    "Email": "teodosie",
+    "Password": "1"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": null,
+    "ProgramLucru": null,
+    "Id": "297edcac-7619-4f5b-8a1c-6d721cb0928e",
+    "Email": "Olivia Bako",
+    "Password": "123"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": null,
+    "ProgramLucru": null,
+    "Id": "254e7ad3-232c-4074-ad48-e54bd9fb5a0b",
+    "Email": "Mihai",
+    "Password": "qq"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": null,
+    "ProgramLucru": null,
+    "Id": "3c8995d5-9281-48bd-8184-f707bc0c48a6",
+    "Email": "Paul",
+    "Password": "8899"
   }
 ]

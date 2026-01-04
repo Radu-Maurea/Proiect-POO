@@ -9,9 +9,10 @@ namespace Proiect;
     {
         private const string FileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\utilizatori.json";
 
-        private List<User> utilizatori = new List<User>();
+        public List<User> utilizatori = new List<User>();
+        
         public IReadOnlyList<User> UtilizatoriReadOnly => utilizatori.AsReadOnly();
-
+    
         public Clinica()
         {
             IncarcaDinFisier();
@@ -87,6 +88,20 @@ namespace Proiect;
             return null;
         }
         
-        
-    }
+        public bool StergeUtilizatorDupaEmail(string email)
+        {
+            email = email.Trim().ToLower();
+    
+           
+            var user = utilizatori.FirstOrDefault(u => u.Email.Trim().ToLower() == email && u is Medic);
 
+            if (user != null)
+            {
+                utilizatori.Remove(user); 
+                SalvareInFisier();       
+                return true;
+            }
+    
+            return false;
+        }
+    }

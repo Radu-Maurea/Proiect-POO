@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Drawing; // Asigură-te că ai această referință pentru Color și Font
+using System.Drawing; 
 using System.Windows.Forms;
 
 namespace Proiect;
@@ -8,7 +8,7 @@ public class AdminForm : Form
 {
     private Admin admin;
     private Clinica clinica;
-    
+    private TextBox txtDisplay; //Aici afisam cerintele 
     public void InitializeUI()
     {
         this.Text = "Admin Panel";
@@ -38,12 +38,27 @@ public class AdminForm : Form
         
         Panel sidePanel = new Panel
         {
-            BackColor = Color.FromArgb(45, 45, 48), // Un gri închis profesional
+            BackColor = Color.FromArgb(45, 45, 48), 
             Dock = DockStyle.Left,
             Width = 180
         };
+        
+        Panel mainContentPanel = new Panel {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(20)
+        };
 
-        // Funcție ajutătoare pentru a crea butoane stilizate rapid
+        txtDisplay = new TextBox {
+            Multiline = true,
+            Dock = DockStyle.Fill,
+            ReadOnly = true,
+            ScrollBars = ScrollBars.Vertical,
+            Font = new Font("Consolas", 10), // Font mono-spaced pentru aliniere frumoasa
+            BackColor = Color.White
+        };
+        mainContentPanel.Controls.Add(txtDisplay);
+        
+        
         Button CreateMenuButton(string text, int top)
         {
             return new Button
@@ -71,18 +86,42 @@ public class AdminForm : Form
         Button btnModifica = CreateMenuButton("Modifică Medici", 120);
         btnModifica.Click += (s, e) => MessageBox.Show("Deschide logica modificare...");
 
+        Button btnAfisare = CreateMenuButton("Afisare Conturi", 170);
+        btnAfisare.Click += btnAfisare_Click;
+        
+        Button btnLogout = CreateMenuButton("Logout", 220);
+        btnLogout.Click += btnLogout_Click;
         // Adăugăm butoanele în panelul lateral
         sidePanel.Controls.Add(btnAdauga);
         sidePanel.Controls.Add(btnSterge);
         sidePanel.Controls.Add(btnModifica);
-
+        sidePanel.Controls.Add(btnAfisare);
+        sidePanel.Controls.Add(btnLogout);
         // 4. Adăugăm panel-urile în form (Ordinea contează!)
+        this.Controls.Add(mainContentPanel);
         this.Controls.Add(sidePanel); // Adăugăm meniul lateral
         
         this.Controls.Add(headerPanel);
 
     }
+    private void btnAfisare_Click(object sender, EventArgs e)
+    {
+        txtDisplay.Clear();
+        txtDisplay.AppendText("Conturile de utilizator:" + Environment.NewLine);
+        txtDisplay.AppendText("=========================" + Environment.NewLine);
+        
+        foreach (var utilizator in clinica.UtilizatoriReadOnly)
+        {
+            txtDisplay.AppendText($"[{utilizator.Rol()}] - {utilizator.Email}" + Environment.NewLine);
+        }
+    }
 
+    private void btnLogout_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        MainForm mainForm = new MainForm();
+        mainForm.ShowDialog();
+    }
     public AdminForm(Clinica clinica, Admin admin)
     {
         this.clinica = clinica;

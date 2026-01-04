@@ -103,10 +103,23 @@ namespace Proiect
                 User userLogat = clinica.GetUserLogin(email, password);
                 MessageBox.Show($"Welcome {userLogat.Email}!");
                 this.Hide();
-                if (userLogat is Admin)
+                switch (userLogat)
                 {
-                    AdminForm adminForm = new AdminForm(clinica,(Admin)userLogat);
-                    adminForm.ShowDialog();
+                    case Admin admin:
+                        AdminForm adminForm = new AdminForm(clinica, admin);
+                        adminForm.ShowDialog();
+                        break;
+                    case Medic medic:
+                        MedicForm medicForm = new MedicForm(clinica, medic);
+                        medicForm.ShowDialog();
+                        break;
+                    case Pacient pacient:
+                        PacientForm pacientForm = new PacientForm(clinica, pacient);
+                        pacientForm.ShowDialog();
+                        break;
+                    default:
+                        MessageBox.Show("Something went wrong!");
+                        break;
                 }
             }
             else

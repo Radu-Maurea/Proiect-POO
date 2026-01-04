@@ -10,5 +10,11 @@
     "Id": "0d48c5dc-f9a6-40c7-89ed-274897f59ff6",
     "Email": "edi",
     "Password": "parola"
+  },
+  {
+    "$type": "Pacient",
+    "Id": "48736daf-0416-45ac-8d75-fe864890a8ad",
+    "Email": "radu",
+    "Password": "123"
   }
 ]

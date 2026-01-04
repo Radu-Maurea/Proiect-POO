@@ -5,6 +5,7 @@ namespace Proiect;
 [JsonDerivedType(typeof(Admin), typeDiscriminator: "Admin")]
 [JsonDerivedType(typeof(Medic), typeDiscriminator: "Medic")]
 [JsonDerivedType(typeof(Pacient), typeDiscriminator: "Pacient")]
+
 public abstract class User
 {
     public Guid Id { get; set; }
@@ -16,5 +17,10 @@ public abstract class User
         Id = Guid.NewGuid();
         Email = email;
         Password = password;
+    }
+    public abstract string Rol();
+    public override string ToString()
+    {
+        return $"Email: {Email}, Password: {Password}";
     }
 }

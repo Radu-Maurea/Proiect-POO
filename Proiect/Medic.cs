@@ -1,42 +1,24 @@
 ﻿namespace Proiect
 {
-  
-
     public class Medic : User
     {
-        public string Specialitate { get; private set; }
-        public string ProgramLucru { get; private set; }
-
-        public Medic(string email, string password) : base(email,password) { }
-        private List<Pacient> Pacienti = new List<Pacient>();
-        public override string Rol()
-        {
-            return "Medic";
-        }
         
-        public void AfisarezPacienti()
-        {
-            foreach (var pacient in Pacienti)
-            {
-                Console.WriteLine(pacient.ToString());
-            }
-        }
-        public void SetSpecialitate(string specialitate)
-        {
-            Specialitate = specialitate;
-        }
+        public string Specialitate { get; set; }
+        public string ProgramLucru { get; set; }
+        public string Nume { get; set; }
 
-        public void SetProgram(string program)
-        {
-            ProgramLucru = program;
-        }
+        public Medic(string email, string password) : base(email, password) { }
+
+        public override string Rol() => "Medic";
 
         public override string ToString()
         {
-            return $"{Email} | {Specialitate} | {ProgramLucru}";
+            return $"Dr. {Nume} | Specializare: {Specialitate} | Program: {ProgramLucru} | Contact: {Email}";
         }
 
-
+        public void SetSpecialitate(string s) => Specialitate = s;
+        public void SetProgram(string p) => ProgramLucru = p;
+        public void SetNume(string n) => Nume = n;
     }
     
     public class ServiciuMedical

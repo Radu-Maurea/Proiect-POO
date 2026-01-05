@@ -8,16 +8,46 @@ namespace Proiect;
     public class Clinica
     {
         private const string FileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\utilizatori.json";
-
-        public List<User> utilizatori = new List<User>();
+        private const string ServiciiFileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\servicii.json";
         
+        public List<User> utilizatori = new List<User>();
+        public List<ServiciuMedical> servicii = new List<ServiciuMedical>();
         public IReadOnlyList<User> UtilizatoriReadOnly => utilizatori.AsReadOnly();
     
         public Clinica()
         {
             IncarcaDinFisier();
+            IncarcaServiciiDinFisier();
+        }
+        
+        public void SalvareServiciiInFisier()
+        {
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(servicii, options);
+                File.WriteAllText(ServiciiFileName, jsonString);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show("Eroare la salvarea serviciilor: " + ex.Message);
+            }
         }
 
+        private void IncarcaServiciiDinFisier()
+        {
+            if (!File.Exists(ServiciiFileName)) return;
+            try
+            {
+                string jsonString = File.ReadAllText(ServiciiFileName);
+                servicii = JsonSerializer.Deserialize<List<ServiciuMedical>>(jsonString) ?? new List<ServiciuMedical>();
+            }
+            catch (Exception)
+            {
+                servicii = new List<ServiciuMedical>();
+            }
+        }
+        
         public void AdaugaUtilizator(User user)
         {
             utilizatori.Add(user);
@@ -67,13 +97,19 @@ namespace Proiect;
             try
             {
                 string jsonString = File.ReadAllText(FileName);
-                utilizatori = JsonSerializer.Deserialize<List<User>>(jsonString);
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+        
+                // Atributele [JsonDerivedType] din clasa User fac toata treaba aici:
+                utilizatori = JsonSerializer.Deserialize<List<User>>(jsonString, options) ?? new List<User>();
             }
             catch (Exception ex)
             {
                 utilizatori = new List<User>();
+                System.Windows.Forms.MessageBox.Show("Eroare la încărcare JSON: " + ex.Message);
             }
-            
         }
         
         

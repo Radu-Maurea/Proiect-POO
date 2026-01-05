@@ -12,12 +12,12 @@ public class AdminForm : Form
     private TextBox txtDisplay;
 
     // Panouri principale pentru conținut
-    private Panel panelAdaugare, panelStergere, panelModifica;
+    private Panel panelAdaugare, panelStergere, panelModifica,panelServicii;
 
     // Controale specifice pentru TAB-ul de ADAUGARE
-    private TextBox txtAdaugEmail;
+    private TextBox txtAdaugEmail,txtNumeMedic;
     private TextBox txtAdaugPass;
-
+    private TextBox txtDenumireServiciu, txtPretServiciu, txtDurataServiciu;
     private ComboBox cmbSpecializari,
         cmbProgram,
         cmbMedici,
@@ -35,7 +35,12 @@ public class AdminForm : Form
     {
         this.clinica = clinica;
         this.admin = admin;
+        foreach (var medic in clinica.Medici)
+        {
+            Console.WriteLine(medic);
+        }
         InitializeUI();
+        
     }
 
     public void InitializeUI()
@@ -76,12 +81,13 @@ public class AdminForm : Form
         UI_Adaugare();
         UI_Stergere();
         UI_Modifica();
+        UI_Servicii();
         // Le adăugăm în containerul principal
         mainContentPanel.Controls.Add(txtDisplay);
         mainContentPanel.Controls.Add(panelAdaugare);
         mainContentPanel.Controls.Add(panelStergere);
         mainContentPanel.Controls.Add(panelModifica);
-
+        mainContentPanel.Controls.Add(panelServicii);
         // --- CREARE BUTOANE MENIU ---
         Button CreateMenuButton(string text, int top)
         {
@@ -126,7 +132,7 @@ public class AdminForm : Form
         panelAdaugare.Visible = false;
         panelStergere.Visible = false;
         panelModifica.Visible = false;
-
+        panelServicii.Visible = false; 
         panelActiv.Visible = true;
         panelActiv.BringToFront();
     }
@@ -137,33 +143,36 @@ public class AdminForm : Form
 
         Label lblEmail = new Label { Text = "Email Medic:", Top = 20, Left = 10, AutoSize = true };
         txtAdaugEmail = new TextBox { Top = 20, Left = 120, Width = 200 };
+        
+        Label lblNume = new Label { Text = "Nume:", Top = 60, Left = 10, AutoSize = true };
+        txtNumeMedic = new TextBox { Top = 60, Left = 120, Width = 200 };
+        
+        Label lblPass = new Label { Text = "Parolă:", Top = 100, Left = 10, AutoSize = true };
+        txtAdaugPass = new TextBox { Top = 100, Left = 120, Width = 200, UseSystemPasswordChar = true };
 
-        Label lblPass = new Label { Text = "Parolă:", Top = 60, Left = 10, AutoSize = true };
-        txtAdaugPass = new TextBox { Top = 60, Left = 120, Width = 200, UseSystemPasswordChar = true };
-
-        Label lblSpec = new Label { Text = "Specializare:", Top = 100, Left = 10, AutoSize = true };
+        Label lblSpec = new Label { Text = "Specializare:", Top = 140, Left = 10, AutoSize = true };
         cmbSpecializari = new ComboBox
         {
-            Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList
+            Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList
         };
         cmbSpecializari.Items.AddRange(new object[] { "Cardiologie", "Dermatologie", "Neurologie", "Pediatrie" });
         cmbSpecializari.SelectedIndex = 0;
 
-        Label lblProgram = new Label { Text = "Program:", Top = 140, Left = 10, AutoSize = true };
-        cmbProgram = new ComboBox { Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        Label lblProgram = new Label { Text = "Program:", Top = 180, Left = 10, AutoSize = true };
+        cmbProgram = new ComboBox { Top = 180, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbProgram.Items.AddRange(new object[] { "10:00 - 18:00", "18:00-12:00", "12:00-06:00" });
         cmbProgram.SelectedIndex = 0;
 
         Button btnConfirm = new Button
         {
-            Text = "Confirmă Adăugare", Top = 180, Left = 120, Width = 150, Height = 30,
+            Text = "Confirmă Adăugare", Top = 220, Left = 120, Width = 150, Height = 30,
             BackColor = Color.LightGreen, FlatStyle = FlatStyle.Flat
         };
         btnConfirm.Click += BtnSalveazaMedic_Click;
 
         panelAdaugare.Controls.AddRange(new Control[]
         {
-            lblEmail, txtAdaugEmail, lblPass, txtAdaugPass, lblSpec, cmbSpecializari, lblProgram, cmbProgram, btnConfirm
+            lblEmail, txtAdaugEmail,lblNume,txtNumeMedic ,lblPass, txtAdaugPass, lblSpec, cmbSpecializari, lblProgram, cmbProgram, btnConfirm
         });
     }
 
@@ -171,7 +180,7 @@ public class AdminForm : Form
     {
         string email = txtAdaugEmail.Text.Trim();
         string pass = txtAdaugPass.Text;
-
+        string nume = txtNumeMedic.Text;
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(pass))
         {
             MessageBox.Show("Eroare: Toate câmpurile sunt obligatorii!");
@@ -184,13 +193,14 @@ public class AdminForm : Form
             return;
         }
 
-        bool succes = admin.AdaugaMedic(email, pass, cmbSpecializari.SelectedItem.ToString(),
+        bool succes = admin.AdaugaMedic(email, nume,pass, cmbSpecializari.SelectedItem.ToString(),
             cmbProgram.SelectedItem.ToString());
         if (succes)
             MessageBox.Show("Medic adăugat cu succes!");
 
         txtAdaugEmail.Clear();
         txtAdaugPass.Clear();
+        txtNumeMedic.Clear();
         btnAfisare_Click(null, null);
     }
 
@@ -328,16 +338,63 @@ public class AdminForm : Form
 
     private void btnAddServicii_Click(object sender, EventArgs e)
     {
-        
+        SchimbaPanel(panelServicii);
+    }
+    public void UI_Servicii()
+    {
+        panelServicii = new Panel { Dock = DockStyle.Fill, Visible = false };
+
+        Label lblDenumire = new Label { Text = "Denumire Serviciu:", Top = 20, Left = 10, AutoSize = true };
+        txtDenumireServiciu = new TextBox { Top = 20, Left = 150, Width = 200 };
+
+        Label lblPret = new Label { Text = "Preț (RON):", Top = 60, Left = 10, AutoSize = true };
+        txtPretServiciu = new TextBox { Top = 60, Left = 150, Width = 200 };
+
+        Label lblDurata = new Label { Text = "Durată (minute):", Top = 100, Left = 10, AutoSize = true };
+        txtDurataServiciu = new TextBox { Top = 100, Left = 150, Width = 200 };
+
+        Button btnConfirm = new Button {
+            Text = "Adaugă Serviciu", Top = 150, Left = 150, Width = 150, Height = 35,
+            BackColor = Color.LightBlue, FlatStyle = FlatStyle.Flat
+        };
+        btnConfirm.Click += BtnSalveazaServiciu_Click;
+
+        panelServicii.Controls.AddRange(new Control[] { 
+            lblDenumire, txtDenumireServiciu, lblPret, txtPretServiciu, 
+            lblDurata, txtDurataServiciu, btnConfirm 
+        });
+    }
+    private void BtnSalveazaServiciu_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(txtDenumireServiciu.Text) || 
+            !decimal.TryParse(txtPretServiciu.Text, out decimal pret) || 
+            !int.TryParse(txtDurataServiciu.Text, out int durata))
+        {
+            MessageBox.Show("Vă rugăm să introduceți date valide!");
+            return;
+        }
+
+        bool succes = admin.AdaugaServiciu(txtDenumireServiciu.Text, pret, durata);
+
+        if (succes)
+        {
+            MessageBox.Show("Serviciul a fost salvat în servicii.json!");
+            txtDenumireServiciu.Clear();
+            txtPretServiciu.Clear();
+            txtDurataServiciu.Clear();
+        }
+        else
+        {
+            MessageBox.Show("Eroare la salvarea serviciului.");
+        }
     }
 
-private void btnLogout_Click(object sender, EventArgs e)
+    private void btnLogout_Click(object sender, EventArgs e)
     {
         this.Hide();
         MainForm mainForm = new MainForm(); 
         mainForm.Show();
         this.Close();
     }
-    
     
 }

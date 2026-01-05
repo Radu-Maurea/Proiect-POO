@@ -17,11 +17,12 @@ public class Admin : User
         return "Admin";
     }
 
-    public bool AdaugaMedic(string email, string parola,string specialitate,string programLucru)
+    public bool AdaugaMedic(string email,string nume ,string parola,string specialitate,string programLucru)
     {
             Medic medicNou = new Medic(email,parola);
             medicNou.SetSpecialitate(specialitate);
             medicNou.SetProgram(programLucru);
+            medicNou.SetNume(nume);
             clinica.AdaugaUtilizator(medicNou);
             return true;
     }
@@ -55,6 +56,21 @@ public class Admin : User
         }
 
         return false;
+    }
+   
+    public bool AdaugaServiciu(string denumire, decimal pret, int durata)
+    {
+        try
+        {
+            ServiciuMedical nou = new ServiciuMedical(denumire, pret, durata);
+            clinica.servicii.Add(nou);
+            clinica.SalvareServiciiInFisier();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
     
     

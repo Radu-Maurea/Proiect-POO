@@ -142,5 +142,25 @@ namespace Proiect;
         }
         
         public List<Medic> Medici => utilizatori.Where(u => u is Medic).Cast<Medic>().ToList();
+        
+        public List<Programare> programari = new List<Programare>();
+
+        public void AdaugaProgramare(Programare p)
+        {
+            programari.Add(p);
+            SalvareProgramariInFisier();
+        }
+
+        public void SalvareProgramariInFisier()
+        {
+            try
+            {
+                var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+                string json = System.Text.Json.JsonSerializer.Serialize(programari, options);
+                System.IO.File.WriteAllText(@"F:\info\an_2\Proiect POO\Proiect\Proiect\programari.json", json);
+            }
+            catch (Exception ex) { MessageBox.Show("Eroare salvare programare: " + ex.Message); }
+        }
+        
     }
 

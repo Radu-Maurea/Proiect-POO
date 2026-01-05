@@ -6,7 +6,7 @@
         public string Specialitate { get; set; }
         public string ProgramLucru { get; set; }
         public string Nume { get; set; }
-
+        public List<ServiciuMedical> ServiciiOferite { get; set; } = new List<ServiciuMedical>();
         public Medic(string email, string password) : base(email, password) { }
 
         public override string Rol() => "Medic";
@@ -39,5 +39,4 @@
             return $"{Denumire} | {Pret} lei | {DurataMinute} min";
         }
     }
-
 }

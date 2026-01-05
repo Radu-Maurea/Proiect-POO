@@ -72,6 +72,21 @@ public class Admin : User
             return false;
         }
     }
-    
+    public bool AsociazaServiciuMedic(string emailMedic, string denumireServiciu)
+    {
+        var medic = clinica.Medici.FirstOrDefault(m => m.Email == emailMedic);
+        var serviciu = clinica.servicii.FirstOrDefault(s => s.Denumire == denumireServiciu);
+
+        if (medic != null && serviciu != null)
+        {
+            if (!medic.ServiciiOferite.Any(s => s.Denumire == denumireServiciu))
+            {
+                medic.ServiciiOferite.Add(serviciu);
+                clinica.SalvareInFisier(); 
+                return true;
+            }
+        }
+        return false;
+    }
     
 }

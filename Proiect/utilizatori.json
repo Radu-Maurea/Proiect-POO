@@ -16,6 +16,18 @@
     "Specialitate": "Dermatologie",
     "ProgramLucru": "12:00-06:00",
     "Nume": "Bako Olivia",
+    "ServiciiOferite": [
+      {
+        "Denumire": "Analize Medicale",
+        "Pret": 500,
+        "DurataMinute": 10
+      },
+      {
+        "Denumire": "Consult",
+        "Pret": 250,
+        "DurataMinute": 30
+      }
+    ],
     "Id": "62076d8b-a350-4a24-8a92-682c31e29831",
     "Email": "oliviabako@gmail.com",
     "Password": "SexyRadu"
@@ -25,6 +37,13 @@
     "Specialitate": "Dermatologie",
     "ProgramLucru": "10:00 - 18:00",
     "Nume": "Maurea Alina",
+    "ServiciiOferite": [
+      {
+        "Denumire": "Consult",
+        "Pret": 250,
+        "DurataMinute": 30
+      }
+    ],
     "Id": "e227f81c-eab6-4e79-9fab-7b898a844690",
     "Email": "alinamaurea@yahoo.com",
     "Password": "Banloc808"

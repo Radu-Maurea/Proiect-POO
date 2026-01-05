@@ -1,0 +1,12 @@
+[
+  {
+    "Denumire": "Consult",
+    "Pret": 250,
+    "DurataMinute": 30
+  },
+  {
+    "Denumire": "Analize Medicale",
+    "Pret": 500,
+    "DurataMinute": 10
+  }
+]

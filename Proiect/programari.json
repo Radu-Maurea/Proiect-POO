@@ -1,0 +1,35 @@
+[
+  {
+    "Medic": {
+      "Specialitate": "Dermatologie",
+      "ProgramLucru": "12:00-06:00",
+      "Nume": "Bako Olivia",
+      "ServiciiOferite": [
+        {
+          "Denumire": "Analize Medicale",
+          "Pret": 500,
+          "DurataMinute": 10
+        },
+        {
+          "Denumire": "Consult",
+          "Pret": 250,
+          "DurataMinute": 30
+        }
+      ],
+      "Id": "62076d8b-a350-4a24-8a92-682c31e29831",
+      "Email": "oliviabako@gmail.com",
+      "Password": "SexyRadu"
+    },
+    "Pacient": {
+      "Id": "48736daf-0416-45ac-8d75-fe864890a8ad",
+      "Email": "radu",
+      "Password": "123"
+    },
+    "Serviciu": {
+      "Denumire": "Analize Medicale",
+      "Pret": 500,
+      "DurataMinute": 10
+    },
+    "DataOra": "12:00"
+  }
+]

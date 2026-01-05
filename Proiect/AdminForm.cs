@@ -9,38 +9,33 @@ public class AdminForm : Form
 {
     private Admin admin;
     private Clinica clinica;
+    
+    // Controale principale
     private TextBox txtDisplay;
+    private Panel panelAdaugare, panelStergere, panelModifica, panelServicii, panelAsociere;
 
-    // Panouri principale pentru conținut
-    private Panel panelAdaugare, panelStergere, panelModifica,panelServicii;
+    // Controale Adaugare
+    private TextBox txtAdaugEmail, txtNumeMedic, txtAdaugPass;
+    private ComboBox cmbSpecializari, cmbProgram;
 
-    // Controale specifice pentru TAB-ul de ADAUGARE
-    private TextBox txtAdaugEmail,txtNumeMedic;
-    private TextBox txtAdaugPass;
-    private TextBox txtDenumireServiciu, txtPretServiciu, txtDurataServiciu;
-    private ComboBox cmbSpecializari,
-        cmbProgram,
-        cmbMedici,
-        cmbSelectieEmail,
-        cmbModificaSpecializari,
-        cmbModificaProgram;
-
-    // Controale specifice pentru TAB-ul de STERGERE
+    // Controale Stergere
     private TextBox txtStergeEmail;
 
-    // Controale specifice pentru TAB-ul de MODIFICARE
+    // Controale Modificare
+    private ComboBox cmbSelectieEmail, cmbModificaSpecializari, cmbModificaProgram;
     private Button btnSalveazaModificari;
+
+    // Controale Servicii
+    private TextBox txtDenumireServiciu, txtPretServiciu, txtDurataServiciu;
+
+    // Controale Asociere
+    private ComboBox cmbAsociereMedici, cmbAsociereServicii;
 
     public AdminForm(Clinica clinica, Admin admin)
     {
         this.clinica = clinica;
         this.admin = admin;
-        foreach (var medic in clinica.Medici)
-        {
-            Console.WriteLine(medic);
-        }
         InitializeUI();
-        
     }
 
     public void InitializeUI()
@@ -48,353 +43,220 @@ public class AdminForm : Form
         admin.SetClinica(clinica);
 
         this.Text = "Admin Panel";
-        this.Width = 600;
-        this.Height = 450;
+        this.Width = 700;
+        this.Height = 600;
         this.StartPosition = FormStartPosition.CenterScreen;
         this.BackColor = Color.FromArgb(240, 248, 255);
 
-        // --- HEADER (Rămâne neschimbat) ---
+        // --- HEADER ---
         Panel headerPanel = new Panel { BackColor = Color.DarkBlue, Dock = DockStyle.Top, Height = 80 };
-        Label lbl = new Label
-        {
+        Label lbl = new Label {
             Text = $"Autentificat ca: {admin.Email}",
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter
+            ForeColor = Color.White, Font = new Font("Segoe UI", 12, FontStyle.Bold),
+            Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter
         };
         headerPanel.Controls.Add(lbl);
 
-        // --- SIDEBAR (Meniu stânga) ---
+        // --- SIDEBAR ---
         Panel sidePanel = new Panel { BackColor = Color.FromArgb(45, 45, 48), Dock = DockStyle.Left, Width = 180 };
 
-        // --- CONTENT AREA (Zona unde se schimbă panourile) ---
+        // --- CONTENT AREA ---
         Panel mainContentPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
-        txtDisplay = new TextBox
-        {
-            Multiline = true, Dock = DockStyle.Fill, ReadOnly = true,
+        txtDisplay = new TextBox {
+            Multiline = true, Dock = DockStyle.Fill, ReadOnly = true, Visible = false,
             ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 10), BackColor = Color.White
         };
 
-        // Inițializăm cele două panouri de lucru
+        // Initializare Paneluri
         UI_Adaugare();
         UI_Stergere();
         UI_Modifica();
         UI_Servicii();
-        // Le adăugăm în containerul principal
-        mainContentPanel.Controls.Add(txtDisplay);
-        mainContentPanel.Controls.Add(panelAdaugare);
-        mainContentPanel.Controls.Add(panelStergere);
-        mainContentPanel.Controls.Add(panelModifica);
-        mainContentPanel.Controls.Add(panelServicii);
-        // --- CREARE BUTOANE MENIU ---
-        Button CreateMenuButton(string text, int top)
-        {
-            return new Button
-            {
+        UI_Asociere();
+
+        mainContentPanel.Controls.AddRange(new Control[] { 
+            txtDisplay, panelAdaugare, panelStergere, panelModifica, panelServicii, panelAsociere 
+        });
+
+        // --- BUTOANE MENIU ---
+        Button CreateMenuButton(string text, int top) {
+            return new Button {
                 Text = text, Top = top, Left = 10, Width = 160, Height = 40,
                 FlatStyle = FlatStyle.Flat, ForeColor = Color.White,
-                BackColor = Color.FromArgb(63, 63, 70),
-                Font = new Font("Segoe UI", 9, FontStyle.Regular), Cursor = Cursors.Hand
+                BackColor = Color.FromArgb(63, 63, 70), Cursor = Cursors.Hand
             };
         }
 
         Button btnAdauga = CreateMenuButton("Adaugă Medici", 20);
-        btnAdauga.Click += (s, e) => { SchimbaPanel(panelAdaugare); };
+        btnAdauga.Click += (s, e) => SchimbaPanel(panelAdaugare);
 
         Button btnSterge = CreateMenuButton("Șterge Medici", 70);
-        btnSterge.Click += (s, e) => { SchimbaPanel(panelStergere); };
+        btnSterge.Click += (s, e) => SchimbaPanel(panelStergere);
 
         Button btnModifica = CreateMenuButton("Modifică Medici", 120);
-        btnModifica.Click += btnModifica_Click;
+        btnModifica.Click += (s, e) => SchimbaPanel(panelModifica);
 
         Button btnAfisare = CreateMenuButton("Afisare Conturi", 170);
-        btnAfisare.Click += btnAfisare_Click;
+        btnAfisare.Click += (s, e) => SchimbaPanel(txtDisplay);
 
-        Button btnAddServicii = CreateMenuButton("Adaugare Servicii medicale", 220);
-        btnAddServicii.Click += btnAddServicii_Click;
+        Button btnAddServicii = CreateMenuButton("Adaugare Servicii", 220);
+        btnAddServicii.Click += (s, e) => SchimbaPanel(panelServicii);
 
-        Button btnLogout = CreateMenuButton("Logout", 270);
+        Button btnAsociaza = CreateMenuButton("Asociază Servicii", 270);
+        btnAsociaza.Click += (s, e) => SchimbaPanel(panelAsociere);
+
+        Button btnLogout = CreateMenuButton("Logout", 320);
         btnLogout.Click += btnLogout_Click;
 
-        sidePanel.Controls.AddRange(new Control[] { btnAdauga, btnSterge, btnModifica, btnAfisare, btnAddServicii,btnLogout });
+        sidePanel.Controls.AddRange(new Control[] { btnAdauga, btnSterge, btnModifica, btnAfisare, btnAddServicii, btnAsociaza, btnLogout });
 
         this.Controls.Add(mainContentPanel);
         this.Controls.Add(sidePanel);
         this.Controls.Add(headerPanel);
     }
 
-    // Metodă pentru a schimba vizibilitatea între secțiuni
-    private void SchimbaPanel(Panel panelActiv)
+    private void SchimbaPanel(Control controlActiv)
     {
+        // Ascundem tot
         txtDisplay.Visible = false;
         panelAdaugare.Visible = false;
         panelStergere.Visible = false;
         panelModifica.Visible = false;
-        panelServicii.Visible = false; 
-        panelActiv.Visible = true;
-        panelActiv.BringToFront();
+        panelServicii.Visible = false;
+        panelAsociere.Visible = false;
+
+        // Populare date "On Demand"
+        if (controlActiv == panelModifica) {
+            cmbSelectieEmail.Items.Clear();
+            foreach (var u in clinica.UtilizatoriReadOnly.Where(x => x.Rol() == "Medic"))
+                cmbSelectieEmail.Items.Add(u.Email);
+        }
+        else if (controlActiv == panelAsociere) {
+            cmbAsociereMedici.Items.Clear();
+            foreach (var m in clinica.Medici)
+                cmbAsociereMedici.Items.Add($"{m.Nume} | {m.Email}");
+
+            cmbAsociereServicii.Items.Clear();
+            foreach (var s in clinica.servicii)
+                cmbAsociereServicii.Items.Add(s.Denumire);
+        }
+        else if (controlActiv == txtDisplay) {
+            txtDisplay.Clear();
+            txtDisplay.AppendText("Utilizatori in sistem:" + Environment.NewLine);
+            foreach (var u in clinica.UtilizatoriReadOnly)
+                txtDisplay.AppendText($"[{u.Rol()}] - {u.Email}" + Environment.NewLine);
+        }
+
+        controlActiv.Visible = true;
+        controlActiv.BringToFront();
     }
 
-    public void UI_Adaugare()
-    {
+    public void UI_Adaugare() {
         panelAdaugare = new Panel { Dock = DockStyle.Fill, Visible = false };
-
-        Label lblEmail = new Label { Text = "Email Medic:", Top = 20, Left = 10, AutoSize = true };
         txtAdaugEmail = new TextBox { Top = 20, Left = 120, Width = 200 };
-        
-        Label lblNume = new Label { Text = "Nume:", Top = 60, Left = 10, AutoSize = true };
         txtNumeMedic = new TextBox { Top = 60, Left = 120, Width = 200 };
-        
-        Label lblPass = new Label { Text = "Parolă:", Top = 100, Left = 10, AutoSize = true };
         txtAdaugPass = new TextBox { Top = 100, Left = 120, Width = 200, UseSystemPasswordChar = true };
-
-        Label lblSpec = new Label { Text = "Specializare:", Top = 140, Left = 10, AutoSize = true };
-        cmbSpecializari = new ComboBox
-        {
-            Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList
-        };
+        
+        cmbSpecializari = new ComboBox { Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbSpecializari.Items.AddRange(new object[] { "Cardiologie", "Dermatologie", "Neurologie", "Pediatrie" });
         cmbSpecializari.SelectedIndex = 0;
 
-        Label lblProgram = new Label { Text = "Program:", Top = 180, Left = 10, AutoSize = true };
         cmbProgram = new ComboBox { Top = 180, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        cmbProgram.Items.AddRange(new object[] { "10:00 - 18:00", "18:00-12:00", "12:00-06:00" });
+        cmbProgram.Items.AddRange(new object[] { "10:00-18:00", "18:00-12:00", "00:00-06:00" });
         cmbProgram.SelectedIndex = 0;
 
-        Button btnConfirm = new Button
-        {
-            Text = "Confirmă Adăugare", Top = 220, Left = 120, Width = 150, Height = 30,
-            BackColor = Color.LightGreen, FlatStyle = FlatStyle.Flat
-        };
-        btnConfirm.Click += BtnSalveazaMedic_Click;
+        Button btn = new Button { Text = "Salvează", Top = 230, Left = 120, BackColor = Color.LightGreen };
+        btn.Click += BtnSalveazaMedic_Click;
 
-        panelAdaugare.Controls.AddRange(new Control[]
-        {
-            lblEmail, txtAdaugEmail,lblNume,txtNumeMedic ,lblPass, txtAdaugPass, lblSpec, cmbSpecializari, lblProgram, cmbProgram, btnConfirm
+        panelAdaugare.Controls.AddRange(new Control[] { 
+            new Label { Text = "Email:", Top = 20, Left = 10 }, txtAdaugEmail,
+            new Label { Text = "Nume:", Top = 60, Left = 10 }, txtNumeMedic,
+            new Label { Text = "Parolă:", Top = 100, Left = 10 }, txtAdaugPass,
+            new Label { Text = "Spec:", Top = 140, Left = 10 }, cmbSpecializari,
+            new Label { Text = "Program:", Top = 180, Left = 10 }, cmbProgram, btn 
         });
     }
 
-    private void BtnSalveazaMedic_Click(object sender, EventArgs e)
-    {
-        string email = txtAdaugEmail.Text.Trim();
-        string pass = txtAdaugPass.Text;
-        string nume = txtNumeMedic.Text;
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(pass))
-        {
-            MessageBox.Show("Eroare: Toate câmpurile sunt obligatorii!");
-            return;
+    private void BtnSalveazaMedic_Click(object sender, EventArgs e) {
+        if (admin.AdaugaMedic(txtAdaugEmail.Text, txtNumeMedic.Text, txtAdaugPass.Text, 
+            cmbSpecializari.SelectedItem.ToString(), cmbProgram.SelectedItem.ToString())) {
+            MessageBox.Show("Succes!");
+            txtAdaugEmail.Clear(); txtNumeMedic.Clear(); txtAdaugPass.Clear();
         }
-
-        if (clinica.ExistaEmail(email))
-        {
-            MessageBox.Show("Eroare: Acest email este deja înregistrat!");
-            return;
-        }
-
-        bool succes = admin.AdaugaMedic(email, nume,pass, cmbSpecializari.SelectedItem.ToString(),
-            cmbProgram.SelectedItem.ToString());
-        if (succes)
-            MessageBox.Show("Medic adăugat cu succes!");
-
-        txtAdaugEmail.Clear();
-        txtAdaugPass.Clear();
-        txtNumeMedic.Clear();
-        btnAfisare_Click(null, null);
     }
 
-    public void UI_Stergere()
-    {
+    public void UI_Stergere() {
         panelStergere = new Panel { Dock = DockStyle.Fill, Visible = false };
-
-        Label lblEmail = new Label { Text = "Email Medic de șters:", Top = 20, Left = 10, AutoSize = true };
-        txtStergeEmail = new TextBox { Top = 20, Left = 150, Width = 200 };
-
-        Button btnConfirmStergere = new Button
-        {
-            Text = "Confirmă Ștergere", Top = 70, Left = 150, Width = 150, Height = 30,
-            BackColor = Color.Red, FlatStyle = FlatStyle.Flat, ForeColor = Color.White
-        };
-        btnConfirmStergere.Click += btnStergeMedic_Click;
-
-        panelStergere.Controls.AddRange(new Control[] { lblEmail, txtStergeEmail, btnConfirmStergere });
+        txtStergeEmail = new TextBox { Top = 20, Left = 120, Width = 200 };
+        Button btn = new Button { Text = "Șterge", Top = 60, Left = 120, BackColor = Color.Red, ForeColor = Color.White };
+        btn.Click += (s, e) => { if(admin.StergeMedic(txtStergeEmail.Text)) MessageBox.Show("Șters!"); };
+        panelStergere.Controls.AddRange(new Control[] { new Label { Text = "Email:", Top = 20, Left = 10 }, txtStergeEmail, btn });
     }
 
-    private void btnStergeMedic_Click(object sender, EventArgs e)
-    {
-        string email = txtStergeEmail.Text.Trim().ToLower();
-        if (string.IsNullOrEmpty(email))
-        {
-            MessageBox.Show("Introduceți email-ul medicului pentru ștergere.");
-            return;
-        }
-
-        bool succes = admin.StergeMedic(email);
-        if (succes)
-        {
-            MessageBox.Show("Medicul a fost eliminat definitiv.");
-            txtStergeEmail.Clear();
-            btnAfisare_Click(null, null);
-        }
-        else
-        {
-            MessageBox.Show("Eroare:Medicul nu a fost gasit");
-        }
-
-    }
-
-    private void btnAfisare_Click(object sender, EventArgs e)
-    {
-        SchimbaPanel(new Panel());
-        txtDisplay.Visible = true;
-        txtDisplay.Clear();
-        txtDisplay.AppendText("Lista Utilizatori Sistem:" + Environment.NewLine);
-        txtDisplay.AppendText("--------------------------" + Environment.NewLine);
-
-        foreach (var u in clinica.UtilizatoriReadOnly)
-        {
-            txtDisplay.AppendText($"[{u.Rol()}] - {u.Email}" + Environment.NewLine); //
-        }
-    }
-
-    private void btnModifica_Click(object sender, EventArgs e)
-    {
-        cmbSelectieEmail.Items.Clear();
-        foreach (var u in clinica.UtilizatoriReadOnly)
-        {
-            if (u.Rol() == "Medic") cmbSelectieEmail.Items.Add(u.Email);
-        }
-
-        // 2. Afișează panelul existent
-        SchimbaPanel(panelModifica);
-
-    }
-
-    private void UI_Modifica()
-    {
+    public void UI_Modifica() {
         panelModifica = new Panel { Dock = DockStyle.Fill, Visible = false };
-        Label lblEmail = new Label { Text = "Selectează Medic:", Top = 20, Left = 10, AutoSize = true };
-        cmbSelectieEmail = new ComboBox
-        {
-            Top = 20, Left = 120, Width = 200,
-            DropDownStyle = ComboBoxStyle.DropDownList
-        };
-        Label lblSpecializare = new Label { Text = "Specializare Noua:", Top = 60, Left = 10, AutoSize = true };
-        cmbModificaSpecializari = new ComboBox
-        {
-            Top = 60, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList
-        };
-        cmbModificaSpecializari.Items.AddRange(
-            new object[] { "Cardiologie", "Dermatologie", "Neurologie", "Pediatrie" });
-        cmbModificaSpecializari.SelectedIndex = 0;
-
-        Label lblProgram = new Label { Text = "Program:", Top = 100, Left = 10, AutoSize = true };
-        cmbModificaProgram = new ComboBox
-            { Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbSelectieEmail = new ComboBox { Top = 20, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbModificaSpecializari = new ComboBox { Top = 60, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbModificaSpecializari.Items.AddRange(new object[] { "Cardiologie", "Dermatologie", "Neurologie", "Pediatrie" });
+        cmbModificaProgram = new ComboBox { Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbModificaProgram.Items.AddRange(new object[] { "10:00 - 18:00", "18:00-12:00", "12:00-06:00" });
-        cmbModificaProgram.SelectedIndex = 0;
-
-        btnSalveazaModificari = new Button
-        {
-            Text = "Salvează Modificări", Top = 150, Left = 130, Width = 150, Height = 35,
-            BackColor = Color.LightSkyBlue, FlatStyle = FlatStyle.Flat
+        
+        Button btn = new Button { Text = "Modifică", Top = 150, Left = 120, BackColor = Color.LightSkyBlue };
+        btn.Click += (s, e) => {
+            if (admin.ModificaMedic(cmbSelectieEmail.Text, cmbModificaSpecializari.Text, cmbModificaProgram.Text))
+                MessageBox.Show("Actualizat!");
         };
-        btnSalveazaModificari.Click += BtnSalveazaModificari_Click;
-
-        panelModifica.Controls.Add(lblEmail);
-        panelModifica.Controls.Add(lblSpecializare);
-        panelModifica.Controls.Add(cmbModificaSpecializari);
-        panelModifica.Controls.Add(cmbSelectieEmail);
-        panelModifica.Controls.Add(lblProgram);
-        panelModifica.Controls.Add(cmbModificaProgram);
-        panelModifica.Controls.Add(btnSalveazaModificari);
-    }
-
-    private void BtnSalveazaModificari_Click(object sender, EventArgs e)
-    {
-        if (cmbSelectieEmail.SelectedItem == null)
-        {
-            MessageBox.Show("Vă rugăm selectați un medic!");
-            return;
-        }
-
-        string email = cmbSelectieEmail.SelectedItem.ToString();
-        string spec = cmbModificaSpecializari.SelectedItem?.ToString() ?? "Nespecificat";
-        string prog = cmbModificaProgram.SelectedItem?.ToString() ?? "Nespecificat";
-
-        bool succes = admin.ModificaMedic(email, spec, prog);
-
-        if (succes)
-        {
-            MessageBox.Show($"Datele medicului {email} au fost actualizate!");
-            btnAfisare_Click(null, null); // Refresh la listă
-        }
-        else
-        {
-            MessageBox.Show("Eroare la modificarea datelor.");
-        }
-    }
-
-    private void btnAddServicii_Click(object sender, EventArgs e)
-    {
-        SchimbaPanel(panelServicii);
-    }
-    public void UI_Servicii()
-    {
-        panelServicii = new Panel { Dock = DockStyle.Fill, Visible = false };
-
-        Label lblDenumire = new Label { Text = "Denumire Serviciu:", Top = 20, Left = 10, AutoSize = true };
-        txtDenumireServiciu = new TextBox { Top = 20, Left = 150, Width = 200 };
-
-        Label lblPret = new Label { Text = "Preț (RON):", Top = 60, Left = 10, AutoSize = true };
-        txtPretServiciu = new TextBox { Top = 60, Left = 150, Width = 200 };
-
-        Label lblDurata = new Label { Text = "Durată (minute):", Top = 100, Left = 10, AutoSize = true };
-        txtDurataServiciu = new TextBox { Top = 100, Left = 150, Width = 200 };
-
-        Button btnConfirm = new Button {
-            Text = "Adaugă Serviciu", Top = 150, Left = 150, Width = 150, Height = 35,
-            BackColor = Color.LightBlue, FlatStyle = FlatStyle.Flat
-        };
-        btnConfirm.Click += BtnSalveazaServiciu_Click;
-
-        panelServicii.Controls.AddRange(new Control[] { 
-            lblDenumire, txtDenumireServiciu, lblPret, txtPretServiciu, 
-            lblDurata, txtDurataServiciu, btnConfirm 
+        panelModifica.Controls.AddRange(new Control[] { 
+            new Label { Text = "Medic:", Top = 20, Left = 10 }, cmbSelectieEmail,
+            new Label { Text = "Spec Nouă:", Top = 60, Left = 10 }, cmbModificaSpecializari,
+            new Label { Text = "Prog Nou:", Top = 100, Left = 10 }, cmbModificaProgram, btn 
         });
     }
-    private void BtnSalveazaServiciu_Click(object sender, EventArgs e)
-    {
-        if (string.IsNullOrWhiteSpace(txtDenumireServiciu.Text) || 
-            !decimal.TryParse(txtPretServiciu.Text, out decimal pret) || 
-            !int.TryParse(txtDurataServiciu.Text, out int durata))
-        {
-            MessageBox.Show("Vă rugăm să introduceți date valide!");
-            return;
-        }
 
-        bool succes = admin.AdaugaServiciu(txtDenumireServiciu.Text, pret, durata);
+    public void UI_Servicii() {
+        panelServicii = new Panel { Dock = DockStyle.Fill, Visible = false };
+        txtDenumireServiciu = new TextBox { Top = 20, Left = 120, Width = 200 };
+        txtPretServiciu = new TextBox { Top = 60, Left = 120, Width = 200 };
+        txtDurataServiciu = new TextBox { Top = 100, Left = 120, Width = 200 };
+        Button btn = new Button { Text = "Adaugă", Top = 150, Left = 120, BackColor = Color.LightBlue };
+        btn.Click += BtnSalveazaServiciu_Click;
+        panelServicii.Controls.AddRange(new Control[] { 
+            new Label { Text = "Nume:", Top = 20, Left = 10 }, txtDenumireServiciu,
+            new Label { Text = "Pret:", Top = 60, Left = 10 }, txtPretServiciu,
+            new Label { Text = "Durata:", Top = 100, Left = 10 }, txtDurataServiciu, btn 
+        });
+    }
 
-        if (succes)
-        {
-            MessageBox.Show("Serviciul a fost salvat în servicii.json!");
-            txtDenumireServiciu.Clear();
-            txtPretServiciu.Clear();
-            txtDurataServiciu.Clear();
-        }
-        else
-        {
-            MessageBox.Show("Eroare la salvarea serviciului.");
+    private void BtnSalveazaServiciu_Click(object sender, EventArgs e) {
+        if (decimal.TryParse(txtPretServiciu.Text, out decimal p) && int.TryParse(txtDurataServiciu.Text, out int d)) {
+            if (admin.AdaugaServiciu(txtDenumireServiciu.Text, p, d)) {
+                MessageBox.Show("Serviciu salvat!");
+                txtDenumireServiciu.Clear(); txtPretServiciu.Clear(); txtDurataServiciu.Clear();
+            }
         }
     }
 
-    private void btnLogout_Click(object sender, EventArgs e)
-    {
+    public void UI_Asociere() {
+        panelAsociere = new Panel { Dock = DockStyle.Fill, Visible = false };
+        cmbAsociereMedici = new ComboBox { Top = 20, Left = 120, Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
+        cmbAsociereServicii = new ComboBox { Top = 60, Left = 120, Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
+        Button btn = new Button { Text = "Asociază", Top = 110, Left = 120, BackColor = Color.Orange };
+        btn.Click += (s, e) => {
+            if (cmbAsociereMedici.SelectedItem != null && cmbAsociereServicii.SelectedItem != null) {
+                string email = cmbAsociereMedici.Text.Split('|')[1].Trim();
+                if (admin.AsociazaServiciuMedic(email, cmbAsociereServicii.Text)) MessageBox.Show("Asociat!");
+            }
+        };
+        panelAsociere.Controls.AddRange(new Control[] { 
+            new Label { Text = "Medic:", Top = 20, Left = 10 }, cmbAsociereMedici,
+            new Label { Text = "Serviciu:", Top = 60, Left = 10 }, cmbAsociereServicii, btn 
+        });
+    }
+
+    private void btnLogout_Click(object sender, EventArgs e) {
         this.Hide();
-        MainForm mainForm = new MainForm(); 
-        mainForm.Show();
+        new MainForm().Show();
         this.Close();
     }
-    
 }

@@ -55,4 +55,17 @@ public class Pacient : User
         }
         return sb;
     }
+
+    public bool CreereProgramare(Medic medic, ServiciuMedical serviciu, string ora)
+    {
+        try
+        {
+            Programare programareNoua = new Programare(medic,this,serviciu,ora);
+            clinica.AdaugaProgramare(programareNoua);
+            return true;
+        }
+        catch(Exception ex) { return false; }
+        
+    }
+    
 }

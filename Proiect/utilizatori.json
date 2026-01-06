@@ -47,5 +47,32 @@
     "Id": "e227f81c-eab6-4e79-9fab-7b898a844690",
     "Email": "alinamaurea@yahoo.com",
     "Password": "Banloc808"
+  },
+  {
+    "$type": "Pacient",
+    "Id": "8afc2da0-d5bd-4577-bca3-b5f9506480d1",
+    "Email": "florin",
+    "Password": "Secas"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": "Cardiologie",
+    "ProgramLucru": "10:00 - 18:00",
+    "Nume": "45",
+    "ServiciiOferite": [
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      },
+      {
+        "Denumire": "Investigatii",
+        "Pret": 500,
+        "DurataMinute": 25
+      }
+    ],
+    "Id": "8ca761ce-1cf7-42f0-a233-6e238c75b236",
+    "Email": "ionutandrei@gmail.com",
+    "Password": "doctor3"
   }
 ]

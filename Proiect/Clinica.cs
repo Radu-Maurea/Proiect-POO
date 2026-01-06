@@ -9,11 +9,16 @@ namespace Proiect;
     {
         private const string FileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\utilizatori.json";
         private const string ServiciiFileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\servicii.json";
+        private const string ProgramariFileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\programari.json";
         
         public List<User> utilizatori = new List<User>();
         public List<ServiciuMedical> servicii = new List<ServiciuMedical>();
+        public List<Programare> programari = new List<Programare>();
         public IReadOnlyList<User> UtilizatoriReadOnly => utilizatori.AsReadOnly();
-    
+        
+        public List<Medic> Medici => utilizatori.Where(u => u is Medic).Cast<Medic>().ToList();
+        public List<Pacient> Pacienti => utilizatori.Where(u => u is Pacient).Cast<Pacient>().ToList();
+        
         public Clinica()
         {
             IncarcaDinFisier();
@@ -101,7 +106,7 @@ namespace Proiect;
                 { 
                     PropertyNameCaseInsensitive = true 
                 };
-        
+                
                 // Atributele [JsonDerivedType] din clasa User fac toata treaba aici:
                 utilizatori = JsonSerializer.Deserialize<List<User>>(jsonString, options) ?? new List<User>();
             }
@@ -141,9 +146,8 @@ namespace Proiect;
             return false;
         }
         
-        public List<Medic> Medici => utilizatori.Where(u => u is Medic).Cast<Medic>().ToList();
         
-        public List<Programare> programari = new List<Programare>();
+        
 
         public void AdaugaProgramare(Programare p)
         {
@@ -157,9 +161,29 @@ namespace Proiect;
             {
                 var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
                 string json = System.Text.Json.JsonSerializer.Serialize(programari, options);
-                System.IO.File.WriteAllText(@"F:\info\an_2\Proiect POO\Proiect\Proiect\programari.json", json);
+                System.IO.File.WriteAllText(ProgramariFileName, json);
             }
             catch (Exception ex) { MessageBox.Show("Eroare salvare programare: " + ex.Message); }
+        }
+
+        public void IncarcaProgramariDinFisier()
+        {
+            if (!File.Exists(ProgramariFileName)) return;
+            try
+            {
+                string jsonString = File.ReadAllText(ProgramariFileName);
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+                
+                programari = JsonSerializer.Deserialize<List<Programare>>(jsonString, options) ?? new List<Programare>();
+            }
+            catch (Exception ex)
+            {
+                programari = new List<Programare>();
+                System.Windows.Forms.MessageBox.Show("Eroare la încărcare JSON: " + ex.Message);
+            }
         }
         
     }

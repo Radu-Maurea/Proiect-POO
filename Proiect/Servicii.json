@@ -8,5 +8,15 @@
     "Denumire": "Analize Medicale",
     "Pret": 500,
     "DurataMinute": 10
+  },
+  {
+    "Denumire": "Operatie",
+    "Pret": 500,
+    "DurataMinute": 1
+  },
+  {
+    "Denumire": "Investigatii",
+    "Pret": 500,
+    "DurataMinute": 25
   }
 ]

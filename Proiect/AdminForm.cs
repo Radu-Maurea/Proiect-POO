@@ -105,8 +105,8 @@ public class AdminForm : Form
 
         Button btnAsociaza = CreateMenuButton("Asociază Servicii", 270);
         btnAsociaza.Click += (s, e) => SchimbaPanel(panelAsociere);
-
-        Button btnLogout = CreateMenuButton("Logout", 320);
+        
+        Button btnLogout = CreateMenuButton("Logout", 370);
         btnLogout.Click += btnLogout_Click;
 
         sidePanel.Controls.AddRange(new Control[] { btnAdauga, btnSterge, btnModifica, btnAfisare, btnAddServicii, btnAsociaza, btnLogout });

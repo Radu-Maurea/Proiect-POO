@@ -30,6 +30,65 @@
       "Pret": 500,
       "DurataMinute": 10
     },
-    "DataOra": "12:00"
+    "DataOra": "14:00",
+    "Diagnostic": null
+  },
+  {
+    "Medic": {
+      "Specialitate": "Dermatologie",
+      "ProgramLucru": "10:00 - 18:00",
+      "Nume": "Maurea Alina",
+      "ServiciiOferite": [
+        {
+          "Denumire": "Consult",
+          "Pret": 250,
+          "DurataMinute": 30
+        }
+      ],
+      "Id": "e227f81c-eab6-4e79-9fab-7b898a844690",
+      "Email": "alinamaurea@yahoo.com",
+      "Password": "Banloc808"
+    },
+    "Pacient": {
+      "Id": "48736daf-0416-45ac-8d75-fe864890a8ad",
+      "Email": "radu",
+      "Password": "123"
+    },
+    "Serviciu": {
+      "Denumire": "Consult",
+      "Pret": 250,
+      "DurataMinute": 30
+    },
+    "DataOra": "10:00",
+    "Diagnostic": "Bolnav"
+  },
+  {
+    "Medic": {
+      "Specialitate": "Cardiologie",
+      "ProgramLucru": "10:00 - 18:00",
+      "Nume": "45",
+      "ServiciiOferite": [
+        {
+          "Denumire": "Operatie",
+          "Pret": 500,
+          "DurataMinute": 1
+        }
+      ],
+      "Id": "8ca761ce-1cf7-42f0-a233-6e238c75b236",
+      "Email": "ionutandrei@gmail.com",
+      "Password": "doctor3"
+    },
+    "Pacient": {
+      "Id": "48736daf-0416-45ac-8d75-fe864890a8ad",
+      "Email": "radu",
+      "Password": "123"
+    },
+    "Serviciu": {
+      "Denumire": "Operatie",
+      "Pret": 500,
+      "DurataMinute": 1
+    },
+    "DataOra": "13:00",
+    "Diagnostic": "Operatia a fost realizata cu succes"
   }
 ]

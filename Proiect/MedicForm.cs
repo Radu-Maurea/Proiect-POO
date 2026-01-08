@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Drawing; 
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Proiect;
@@ -8,14 +8,18 @@ public class MedicForm : Form
 {
     private Medic medic;
     private Clinica clinica;
+    private ILogger logger; 
     
     private Button btnSalveazaDiagnostic;
     private Panel mainContentPanel,panelIstoric,panelDiagnostic;
     private ComboBox cmbPacienti;
     private TextBox txtIstoric,txtDiagnostic;
+
     public void InitializeUI()
     {
         medic.SetClinica(clinica);
+        medic.SetLogger(logger); 
+
         this.Text = "Medic Panel";
         this.Width = 750; 
         this.Height = 500;
@@ -65,69 +69,73 @@ public class MedicForm : Form
         Label lblIstoric = new Label { Text = "Istoric Programari:", Top = 20, Left = 10, AutoSize = true };
         txtIstoric = new TextBox { Top = 80, Left = 10, Width = 450, Height = 250, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 10) };
         
-        foreach (var programare in clinica.programari)
-        {
-            if(programare.Medic.Email == medic.Email)
-                txtIstoric.AppendText(programare.ToString()+Environment.NewLine);
-        }
+        ActualizareIstoric();
         panelIstoric.Controls.AddRange(new Control[] { lblIstoric, txtIstoric });
-        
+    }
+
+    private void ActualizareIstoric()
+    {
+        if (txtIstoric != null)
+        {
+            txtIstoric.Clear();
+            foreach (var programare in clinica.programari)
+            {
+                if(programare.Medic.Email == medic.Email && programare.Vazut == false)
+                    txtIstoric.AppendText(programare.ToString()+Environment.NewLine);
+            }
+        }
     }
 
     private void UI_Diagnostic()
-{
-    panelDiagnostic = new Panel { Dock = DockStyle.Fill, Visible = false };
-    
-    Label lblPacient = new Label { Text = "Selectează Programare:", Top = 20, Left = 10, AutoSize = true };
-    cmbPacienti = new ComboBox { Top = 20, Left = 150, Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
-
-    // Populează ComboBox-ul
-    ActualizeazaComboDiagnostic();
-
-    Label lblDiag = new Label { Text = "Diagnostic:", Top = 60, Left = 10, AutoSize = true };
-    txtDiagnostic = new TextBox { 
-        Top = 80, Left = 10, Width = 400, Height = 150, 
-        Multiline = true, ScrollBars = ScrollBars.Vertical 
-    };
-
-    btnSalveazaDiagnostic = new Button {
-        Text = "Salvează Diagnostic", Top = 240, Left = 10, Width = 150, 
-        BackColor = Color.LightGreen, FlatStyle = FlatStyle.Flat
-    };
-
-    // EVENIMENTUL DE CLICK
-    btnSalveazaDiagnostic.Click += (s, e) => {
-        if (cmbPacienti.SelectedItem == null || string.IsNullOrWhiteSpace(txtDiagnostic.Text))
-        {
-            MessageBox.Show("Te rugăm să selectezi un pacient și să introduci diagnosticul!");
-            return;
-        }
-
-        // Apelăm logica din clasa Medic
-        medic.GiveDiagnostic(cmbPacienti.SelectedItem.ToString(), txtDiagnostic.Text);
+    {
+        panelDiagnostic = new Panel { Dock = DockStyle.Fill, Visible = false };
         
-        // Salvăm în fișier prin intermediul clinicii
-        clinica.SalvareProgramariInFisier();
-        
-        MessageBox.Show("Diagnostic salvat cu succes!");
-        txtDiagnostic.Clear();
-    };
+        Label lblPacient = new Label { Text = "Selectează Programare:", Top = 20, Left = 10, AutoSize = true };
+        cmbPacienti = new ComboBox { Top = 20, Left = 150, Width = 250, DropDownStyle = ComboBoxStyle.DropDownList };
 
-    panelDiagnostic.Controls.AddRange(new Control[] { lblPacient, cmbPacienti, lblDiag, txtDiagnostic, btnSalveazaDiagnostic });
+        ActualizeazaComboDiagnostic();
+
+        Label lblDiag = new Label { Text = "Diagnostic:", Top = 60, Left = 10, AutoSize = true };
+        txtDiagnostic = new TextBox { 
+            Top = 80, Left = 10, Width = 400, Height = 150, 
+            Multiline = true, ScrollBars = ScrollBars.Vertical 
+        };
+
+        btnSalveazaDiagnostic = new Button {
+            Text = "Salvează Diagnostic", Top = 240, Left = 10, Width = 150, 
+            BackColor = Color.LightGreen, FlatStyle = FlatStyle.Flat
+        };
+
+        btnSalveazaDiagnostic.Click += (s, e) => {
+            if (cmbPacienti.SelectedItem == null || string.IsNullOrWhiteSpace(txtDiagnostic.Text))
+            {
+                logger?.LogWarning($"[VALIDARE ESUATA] Medicul {medic.Email} a incercat salvarea unui diagnostic fara a completa toate datele.");
+                MessageBox.Show("Te rugăm să selectezi un pacient și să introduci diagnosticul!");
+                return;
+            }
+
+            medic.GiveDiagnostic(cmbPacienti.SelectedItem.ToString(), txtDiagnostic.Text);
+            
+            clinica.SalvareProgramariInFisier();
+            ActualizeazaComboDiagnostic();
+            ActualizareIstoric();
+            MessageBox.Show("Diagnostic salvat cu succes!");
+            txtDiagnostic.Clear();
+        };
+
+        panelDiagnostic.Controls.AddRange(new Control[] { lblPacient, cmbPacienti, lblDiag, txtDiagnostic, btnSalveazaDiagnostic });
     }
 
-// Metodă pentru a reîmprospăta lista de pacienți/programări
     private void ActualizeazaComboDiagnostic()
     {
-    cmbPacienti.Items.Clear();
-    foreach (var programare in clinica.programari)
-    {
-        if (programare.Medic.Email == medic.Email)
+        cmbPacienti.Items.Clear();
+        foreach (var programare in clinica.programari)
         {
-            // Formatul: email_pacient - data_ora
-            cmbPacienti.Items.Add(programare.Pacient.Email + " - " + programare.DataOra);
+            if (programare.Medic.Email == medic.Email && programare.Vazut == false)
+            {
+                cmbPacienti.Items.Add(programare.Pacient.Email + " - " + programare.DataOra);
+            }
         }
-    }
     }
     
     private void SchimbaPanel(Panel panelActiv)
@@ -142,13 +150,14 @@ public class MedicForm : Form
     {
         this.clinica = clinica;
         this.medic = medic;
+        this.logger = new FileLogger(); 
         InitializeUI();
     }
+
     private void btnLogout_Click(object sender, EventArgs e)
     {
         this.Hide();
         new MainForm().Show();
         this.Close();
     }
-    
 }

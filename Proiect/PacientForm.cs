@@ -9,24 +9,29 @@ public class PacientForm : Form
 {
     private Pacient pacient;
     private Clinica clinica;
+    private ILogger logger; 
 
-    private Panel mainContentPanel, panelCautare, panelCautareSpecializare, panelProgramare,panelIstoric,panelModificare;
-    private TextBox txtCautareNume, txtRezultat, txtRezultatSpecialitate,txtIstoric;
+    private Panel mainContentPanel, panelCautare, panelCautareSpecializare, panelProgramare,panelIstoric,panelModificare,panelDiagnostic;
+    private TextBox txtCautareNume, txtRezultat, txtRezultatSpecialitate,txtIstoric,txtDiagnostic;
     private ComboBox cmbSelectieSpecializare, cmbSelectieDoctor, cmbSelectieServiciu, cmbSelectieOra,cmbSelectieReprogramare,cmbModificareOra,cmbModificareDoctor;
     private Button btnConfirmaProgramarea,btnStergeProgramare,btnReprogramare;
     private ComboBox cmbModifDoctor, cmbModifServiciu, cmbModifOra;
     private Label lblModifDoctor, lblModifServiciu, lblModifOra;
     private Button btnSalveazaModificare;
+
     public PacientForm(Clinica clinica, Pacient pacient)
     {
         this.clinica = clinica;
         this.pacient = pacient;
+        this.logger = new FileLogger(); 
         InitializeUI();
     }
 
     public void InitializeUI()
     {
         pacient.SetClinica(clinica);
+        pacient.SetLogger(logger); 
+
         this.Text = "Pacient Panel";
         this.Width = 750;
         this.Height = 500;
@@ -49,8 +54,9 @@ public class PacientForm : Form
         UI_CreereProgramare();
         UI_Istoric();
         UI_Modificare();
+        UI_Diagnostic();
         
-        mainContentPanel.Controls.AddRange(new Control[] { panelCautare, panelCautareSpecializare, panelProgramare,panelIstoric,panelModificare});
+        mainContentPanel.Controls.AddRange(new Control[] { panelCautare, panelCautareSpecializare, panelProgramare,panelIstoric,panelModificare,panelDiagnostic});
 
         Button CreateMenuButton(string text, int top) {
             return new Button {
@@ -75,15 +81,17 @@ public class PacientForm : Form
         Button btnStergeProg = CreateMenuButton("Reprogramare Programari", 220);
         btnStergeProg.Click += (s, e) => SchimbaPanel(panelModificare);
         
-        Button btnLogout = CreateMenuButton("Logout", 270);
+        Button btnDiagnostic = CreateMenuButton("Diagnostic", 270);
+        btnDiagnostic.Click += (s, e) => SchimbaPanel(panelDiagnostic);
+        
+        Button btnLogout = CreateMenuButton("Logout", 320);
         btnLogout.Click += btnLogout_Click;
 
-        sidePanel.Controls.AddRange(new Control[] { btnCauta, btnCautaSpecialitate, btnProgramare, btnVeziProg ,btnStergeProg ,btnLogout });
+        sidePanel.Controls.AddRange(new Control[] { btnCauta, btnCautaSpecialitate, btnProgramare, btnVeziProg ,btnStergeProg,btnDiagnostic ,btnLogout });
         
-        this.Controls.AddRange(new Control[] { mainContentPanel ,sidePanel,headerPanel});
-        // this.Controls.Add(mainContentPanel);
-        // this.Controls.Add(sidePanel);
-        // this.Controls.Add(headerPanel);
+        this.Controls.Add(mainContentPanel);
+        this.Controls.Add(sidePanel);
+        this.Controls.Add(headerPanel);
     }
 
     private void SchimbaPanel(Panel panelActiv)
@@ -93,6 +101,7 @@ public class PacientForm : Form
         panelProgramare.Visible = false;
         panelIstoric.Visible = false;
         panelModificare.Visible = false;
+        panelDiagnostic.Visible = false;
         panelActiv.Visible = true;
         panelActiv.BringToFront();
     }
@@ -136,7 +145,6 @@ public class PacientForm : Form
 
         btnConfirmaProgramarea = new Button { Text = "Confirmă Programarea", Top = 150, Left = 120, Width = 200, Height = 35, BackColor = Color.LightGreen, Visible = false, FlatStyle = FlatStyle.Flat };
         
-        // LEGARE REPARATA: Apelam metoda de procesare
         btnConfirmaProgramarea.Click += (s, e) => ProceseazaProgramareNoua();
 
         cmbSelectieDoctor.SelectedIndexChanged += (s, e) =>
@@ -151,7 +159,7 @@ public class PacientForm : Form
 
                 switch (medicSelectat.ProgramLucru)
                 {
-                    case "10:00 - 18:00":
+                    case "10:00-18:00":
                         cmbSelectieOra.Items.AddRange(new object[] { "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" });
                         break;
                     case "18:00-12:00":
@@ -173,11 +181,11 @@ public class PacientForm : Form
         panelProgramare.Controls.AddRange(new Control[] { lblDoc, cmbSelectieDoctor, lblServ, cmbSelectieServiciu, lblOra, cmbSelectieOra, btnConfirmaProgramarea });
     }
 
-    // METODA DE PROCESARE ADAUGATA
     private void ProceseazaProgramareNoua()
     {
         if (cmbSelectieDoctor.SelectedItem == null || cmbSelectieServiciu.SelectedItem == null || cmbSelectieOra.SelectedItem == null)
         {
+            logger?.LogWarning($"[VALIDARE ESUATA] Pacientul {pacient.Email} a incercat programare fara a selecta toate datele.");
             MessageBox.Show("Vă rugăm selectați Doctorul, Serviciul și Ora!");
             return;
         }
@@ -250,8 +258,14 @@ public class PacientForm : Form
         {
             Text = "Modifica", Top = 60, Left = 220, Width = 80, BackColor = Color.LightBlue, FlatStyle = FlatStyle.Flat
         };
-        btnStergeProgramare.Click += (s, e) => StergeProgramare(cmbSelectieReprogramare.SelectedItem.ToString());
-        btnReprogramare.Click += (s, e) => ModificaraReprogramare(cmbSelectieReprogramare.SelectedItem.ToString());
+        btnStergeProgramare.Click += (s, e) => {
+            if (cmbSelectieReprogramare.SelectedItem != null) 
+                StergeProgramare(cmbSelectieReprogramare.SelectedItem.ToString());
+        };
+        btnReprogramare.Click += (s, e) => {
+            if (cmbSelectieReprogramare.SelectedItem != null)
+                ModificaraReprogramare(cmbSelectieReprogramare.SelectedItem.ToString());
+        };
         panelModificare.Controls.AddRange(new Control[] { lblReprogramare, cmbSelectieReprogramare,btnStergeProgramare,btnReprogramare});
     }
 
@@ -269,7 +283,6 @@ public class PacientForm : Form
         {
             MessageBox.Show("A aparut o eroare");
         }
-        
     }
 
     private void ActualizareReprogramari()
@@ -277,87 +290,96 @@ public class PacientForm : Form
         cmbSelectieReprogramare.Items.Clear();
         foreach (var programare in clinica.programari)
         {
-            if(programare.Pacient.Email == pacient.Email)
+            if(programare.Pacient.Email == pacient.Email && programare.Vazut==false)
                 cmbSelectieReprogramare.Items.Add($"{programare.DataOra} || {programare.Medic.Email}");
         }
     }
 
     private void ModificaraReprogramare(string programareSelectata)
     {
-    if (string.IsNullOrEmpty(programareSelectata))
-    {
-        MessageBox.Show("Selectați o programare din listă!");
-        return;
-    }
-
-    // 1. Curățăm/Resetăm controalele de modificare dacă există deja
-    if (btnSalveazaModificare == null)
-    {
-        lblModifDoctor = new Label { Text = "Doctor Nou:", Top = 100, Left = 10, AutoSize = true };
-        cmbModifDoctor = new ComboBox { Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        
-        lblModifServiciu = new Label { Text = "Serviciu Nou:", Top = 140, Left = 10, AutoSize = true };
-        cmbModifServiciu = new ComboBox { Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        
-        lblModifOra = new Label { Text = "Ora Noua:", Top = 180, Left = 10, AutoSize = true };
-        cmbModifOra = new ComboBox { Top = 180, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-
-        btnSalveazaModificare = new Button { 
-            Text = "Salvează Modificarea", Top = 220, Left = 120, Width = 200, 
-            BackColor = Color.Gold, FlatStyle = FlatStyle.Flat 
-        };
-
-        // Event pentru schimbarea doctorului în procesul de modificare
-        cmbModifDoctor.SelectedIndexChanged += (s, e) => {
-            var medic = clinica.Medici.FirstOrDefault(m => m.Nume == cmbModifDoctor.SelectedItem.ToString());
-            if (medic != null) {
-                cmbModifServiciu.Items.Clear();
-                foreach (var serv in medic.ServiciiOferite) cmbModifServiciu.Items.Add(serv.Denumire);
-                
-                cmbModifOra.Items.Clear();
-                // Folosim logica ta de intervale orare
-                if (medic.ProgramLucru == "10:00 - 18:00") cmbModifOra.Items.AddRange(new object[] { "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" });
-                else if (medic.ProgramLucru == "18:00-12:00") cmbModifOra.Items.AddRange(new object[] { "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "00:00", "01:00" });
-                else cmbModifOra.Items.AddRange(new object[] { "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" });
-            }
-        };
-
-        panelModificare.Controls.AddRange(new Control[] { lblModifDoctor, cmbModifDoctor, lblModifServiciu, cmbModifServiciu, lblModifOra, cmbModifOra, btnSalveazaModificare });
-    }
-
-    // 2. Populăm lista de doctori
-    cmbModifDoctor.Items.Clear();
-    foreach (var m in clinica.Medici) cmbModifDoctor.Items.Add(m.Nume);
-
-    // 3. Logica de salvare
-    btnSalveazaModificare.Click += (s, e) => {
-        if (cmbModifDoctor.SelectedItem == null || cmbModifServiciu.SelectedItem == null || cmbModifOra.SelectedItem == null) {
-            MessageBox.Show("Selectați noile date!");
+        if (string.IsNullOrEmpty(programareSelectata))
+        {
+            MessageBox.Show("Selectați o programare din listă!");
             return;
         }
 
-        // Ștergem programarea veche folosind metoda ta existentă
-        if (pacient.StergeProgramare(programareSelectata)) {
-            // Creăm programarea nouă
-            var medic = clinica.Medici.FirstOrDefault(m => m.Nume == cmbModifDoctor.SelectedItem.ToString());
-            var serviciu = medic?.ServiciiOferite.FirstOrDefault(ser => ser.Denumire == cmbModifServiciu.SelectedItem.ToString());
+        if (btnSalveazaModificare == null)
+        {
+            lblModifDoctor = new Label { Text = "Doctor Nou:", Top = 100, Left = 10, AutoSize = true };
+            cmbModifDoctor = new ComboBox { Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
             
-            if (pacient.CreereProgramare(medic, serviciu, cmbModifOra.SelectedItem.ToString())) {
-                MessageBox.Show("Programare modificată cu succes!");
-                ActualizareReprogramari();
-                ActualizareIstoric();
-                // Ascundem controalele după succes
-                lblModifDoctor.Visible = lblModifServiciu.Visible = lblModifOra.Visible = false;
-                cmbModifDoctor.Visible = cmbModifServiciu.Visible = cmbModifOra.Visible = false;
-                btnSalveazaModificare.Visible = false;
-            }
-        }
-    };
+            lblModifServiciu = new Label { Text = "Serviciu Nou:", Top = 140, Left = 10, AutoSize = true };
+            cmbModifServiciu = new ComboBox { Top = 140, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
+            
+            lblModifOra = new Label { Text = "Ora Noua:", Top = 180, Left = 10, AutoSize = true };
+            cmbModifOra = new ComboBox { Top = 180, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
 
-    lblModifDoctor.Visible = lblModifServiciu.Visible = lblModifOra.Visible = true;
-    cmbModifDoctor.Visible = cmbModifServiciu.Visible = cmbModifOra.Visible = true;
-    btnSalveazaModificare.Visible = true;
+            btnSalveazaModificare = new Button { 
+                Text = "Salvează Modificarea", Top = 220, Left = 120, Width = 200, 
+                BackColor = Color.Gold, FlatStyle = FlatStyle.Flat 
+            };
+
+            cmbModifDoctor.SelectedIndexChanged += (s, e) => {
+                var medic = clinica.Medici.FirstOrDefault(m => m.Nume == cmbModifDoctor.SelectedItem.ToString());
+                if (medic != null) {
+                    cmbModifServiciu.Items.Clear();
+                    foreach (var serv in medic.ServiciiOferite) cmbModifServiciu.Items.Add(serv.Denumire);
+                    
+                    cmbModifOra.Items.Clear();
+                    if (medic.ProgramLucru == "10:00 - 18:00") cmbModifOra.Items.AddRange(new object[] { "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" });
+                    else if (medic.ProgramLucru == "18:00-12:00") cmbModifOra.Items.AddRange(new object[] { "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "00:00", "01:00" });
+                    else cmbModifOra.Items.AddRange(new object[] { "12:00", "13:00", "14:00", "15:00", "16:00", "17:00" });
+                }
+            };
+
+            panelModificare.Controls.AddRange(new Control[] { lblModifDoctor, cmbModifDoctor, lblModifServiciu, cmbModifServiciu, lblModifOra, cmbModifOra, btnSalveazaModificare });
+        }
+
+        cmbModifDoctor.Items.Clear();
+        foreach (var m in clinica.Medici) cmbModifDoctor.Items.Add(m.Nume);
+
+        btnSalveazaModificare.Click += (s, e) => {
+            if (cmbModifDoctor.SelectedItem == null || cmbModifServiciu.SelectedItem == null || cmbModifOra.SelectedItem == null) {
+                logger?.LogWarning($"[MODIFICARE ESUATA] Pacientul {pacient.Email} a incercat modificare fara toate datele.");
+                MessageBox.Show("Selectați noile date!");
+                return;
+            }
+
+            if (pacient.StergeProgramare(programareSelectata)) {
+                var medic = clinica.Medici.FirstOrDefault(m => m.Nume == cmbModifDoctor.SelectedItem.ToString());
+                var serviciu = medic?.ServiciiOferite.FirstOrDefault(ser => ser.Denumire == cmbModifServiciu.SelectedItem.ToString());
+                
+                if (pacient.CreereProgramare(medic, serviciu, cmbModifOra.SelectedItem.ToString())) {
+                    MessageBox.Show("Programare modificată cu succes!");
+                    logger?.LogInfo($"[MODIFICARE REUSITA] Pacientul {pacient.Email} a reprogramat consultatia.");
+                    ActualizareReprogramari();
+                    ActualizareIstoric();
+                    lblModifDoctor.Visible = lblModifServiciu.Visible = lblModifOra.Visible = false;
+                    cmbModifDoctor.Visible = cmbModifServiciu.Visible = cmbModifOra.Visible = false;
+                    btnSalveazaModificare.Visible = false;
+                }
+            }
+        };
+
+        lblModifDoctor.Visible = lblModifServiciu.Visible = lblModifOra.Visible = true;
+        cmbModifDoctor.Visible = cmbModifServiciu.Visible = cmbModifOra.Visible = true;
+        btnSalveazaModificare.Visible = true;
     }
+
+    private void UI_Diagnostic()
+    {
+        panelDiagnostic = new Panel { Dock = DockStyle.Fill, Visible = false };
+        Label lblDiagnostic = new Label { Text = "Diagnostic:", Top = 20, Left = 10, AutoSize = true };
+        txtDiagnostic = new TextBox { Top = 80, Left = 10, Width = 450, Height = 250, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Font = new Font("Consolas", 10) };
+        txtDiagnostic.Clear();
+        foreach (var programare in clinica.programari)
+        {
+            if(programare.Pacient.Email == pacient.Email && programare.Vazut)
+                txtDiagnostic.AppendText(programare.Medic.Nume + " - " + programare.Diagnostic + Environment.NewLine);
+        }
+        panelDiagnostic.Controls.AddRange(new Control[] { lblDiagnostic, txtDiagnostic });
+    }
+
     private void btnLogout_Click(object sender, EventArgs e)
     {
         this.Hide();

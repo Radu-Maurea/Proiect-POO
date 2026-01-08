@@ -6,7 +6,8 @@ namespace Proiect
     //Clinica clinica = new Clinica();
     public class MainForm : Form
     {
-        private Clinica clinica = new Clinica();
+        private static ILogger logger = new FileLogger();
+        private Clinica clinica = new Clinica(logger);
 
         private TextBox txtEmail;
         private TextBox txtPassword;

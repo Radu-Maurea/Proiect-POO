@@ -3,11 +3,15 @@
 public class Pacient : User
 {
     private Clinica clinica;
+    private ILogger _logger;
     public Pacient(string email, string password) : base(email, password){}
-
+    public string Nume { get; set; }
     
     public void SetClinica(Clinica clinica) => this.clinica = clinica;
     
+    public void SetLogger(ILogger logger) => this._logger = logger;
+
+    public void SetNume(string nume) => Nume = nume;
     
     public override string Rol()
     {
@@ -19,12 +23,8 @@ public class Pacient : User
         nume = nume.Trim().ToLower();
         string sb = "";
     
-        Console.WriteLine($"DEBUG: Cautare pornita. Medici in lista: {clinica.Medici.Count}");
-
         foreach (var medic in clinica.Medici)
         {
-            Console.WriteLine($"DEBUG: Verific medicul: '{medic.Nume}'");
-
             if (medic.Nume != null && medic.Nume.ToLower().Contains(nume))
             {
                 sb += medic.ToString() + Environment.NewLine + "-----------------------" + Environment.NewLine;
@@ -62,10 +62,14 @@ public class Pacient : User
         {
             Programare programareNoua = new Programare(medic,this,serviciu,ora);
             clinica.AdaugaProgramare(programareNoua);
+            _logger?.LogInfo($"[PROGRAMARE] Pacientul {Email} a creat o programare la {medic.Nume} pe data/ora {ora}.");
             return true;
         }
-        catch(Exception ex) { return false; }
-        
+        catch(Exception ex) 
+        { 
+            _logger?.LogError($"[EROARE PROGRAMARE] Eșec la crearea programării pentru {Email}: {ex.Message}");
+            return false; 
+        }
     }
 
     public string VeziProgramari(string email)
@@ -74,7 +78,7 @@ public class Pacient : User
         string sb = "";
         foreach (var programare in clinica.programari)
         {
-            if (programare.Pacient.Email == email)
+            if (programare.Pacient.Email == email && programare.Vazut == false)
                 sb += programare.ToString() + Environment.NewLine;
         }
         return sb;
@@ -82,21 +86,30 @@ public class Pacient : User
 
     public bool StergeProgramare(string programare)
     {
-        clinica.IncarcaProgramariDinFisier();
-        string[] parti = programare.Split(new[] { " || " }, StringSplitOptions.None);
-        if (parti.Length == 2)
+        try 
         {
-            string ora = parti[0];
-            string email = parti[1];
-            
-            var deSters = clinica.programari.FirstOrDefault(p=> p.DataOra.Equals(ora) && p.Medic.Email.Equals(email));
-            if (deSters != null)
+            clinica.IncarcaProgramariDinFisier();
+            string[] parti = programare.Split(new[] { " || " }, StringSplitOptions.None);
+            if (parti.Length == 2)
             {
-                clinica.programari.Remove(deSters);
-                clinica.SalvareProgramariInFisier();
-                return true;
+                string ora = parti[0];
+                string emailMedic = parti[1];
+                
+                var deSters = clinica.programari.FirstOrDefault(p=> p.DataOra.Equals(ora) && p.Medic.Email.Equals(emailMedic));
+                if (deSters != null)
+                {
+                    clinica.programari.Remove(deSters);
+                    clinica.SalvareProgramariInFisier();
+                    _logger?.LogInfo($"[ANULARE] Pacientul {Email} a anulat programarea de la {ora} cu medicul {emailMedic}.");
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
+        catch (Exception ex)
+        {
+            _logger?.LogError($"[EROARE ANULARE] Pacientul {Email} nu a putut anula programarea: {ex.Message}");
+            return false;
+        }
     }
 }

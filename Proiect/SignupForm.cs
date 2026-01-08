@@ -1,102 +1,89 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Proiect
 {
     public class SignupForm : Form
     {
-        private ComboBox Roluri;
-        private TextBox Email;
-        private TextBox Password;
-        private Button BtnSignup;
+        private TextBox txtNume; 
+        private TextBox txtEmail;
+        private TextBox txtPassword;
+        private Button btnSignup;
         
         private Clinica clinica;
 
         public void InitializeUI()
         {
-            this.Text = "Creeaza Contul";
+            this.Text = "Creare Cont Pacient";
             this.Width = 350;
-            this.Height = 230;
+            this.Height = 250; 
             this.StartPosition = FormStartPosition.CenterScreen;
-
-            //Selectie Roluri
-            var lblRole = new Label { Left = 30, Top = 30, Text = "Rol:" };
-            Roluri = new ComboBox
-            {
-                Left = 125, Top = 25, Width = 170,
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            Roluri.Items.AddRange(new Object[] {"Admin", "Medic", "Pacient"});
-            Roluri.SelectedIndex = 0;
-
-            //Introducere Email
+            this.BackColor = Color.FromArgb(245, 245, 245);
+            
+            var lblNume = new Label { Left = 30, Top = 30, Text = "Nume Complet:", Width = 90 };
+            txtNume = new TextBox { Left = 130, Top = 25, Width = 160 };
+            
             var lblEmail = new Label { Left = 30, Top = 70, Text = "Email:" };
-            Email = new TextBox { Left = 120, Top = 65, Width = 170 };
+            txtEmail = new TextBox { Left = 130, Top = 65, Width = 160 };
 
-            //Parola 
-            var lblPassword = new Label { Left = 30, Top = 110, Text = "Password:" };
-            Password = new TextBox{
-                Left = 120, Top = 105, Width = 170,
+
+            var lblPassword = new Label { Left = 30, Top = 110, Text = "Parolă:" };
+            txtPassword = new TextBox {
+                Left = 130, Top = 105, Width = 160,
                 UseSystemPasswordChar = true
             };
             
-            //Buton
-            BtnSignup = new Button
+            btnSignup = new Button
             {
-                Left = 120, Top = 150, Width = 170,
-                Text = "Create Account"
+                Left = 130, Top = 160, Width = 160, Height = 35,
+                Text = "Înregistrare",
+                BackColor = Color.LightSkyBlue,
+                FlatStyle = FlatStyle.Flat
             };
-            BtnSignup.Click += BtnSignup_Click;
+            btnSignup.Click += BtnSignup_Click;
+
             Controls.AddRange(new Control[]
             {
-                lblRole, Roluri,
-                lblEmail, Email,
-                lblPassword, Password,
-                BtnSignup
+                lblNume, txtNume,
+                lblEmail, txtEmail,
+                lblPassword, txtPassword,
+                btnSignup
             });
-
         }
 
         private void BtnSignup_Click(object sender, EventArgs e)
         {
-            string rol = Roluri.SelectedItem.ToString();
-            string email = Email.Text.Trim().ToLower();
-            string password = Password.Text;
+            string nume = txtNume.Text.Trim();
+            string email = txtEmail.Text.Trim().ToLower();
+            string password = txtPassword.Text;
             
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(nume) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                MessageBox.Show("Va rog completati toate campurile!");  
+                MessageBox.Show("Vă rugăm să completați toate câmpurile!");  
                 return;
             }
-
+            
             if (clinica.ExistaEmail(email))
             {
-                MessageBox.Show("Emailul este deja folosit!");
+                MessageBox.Show("Acest email este deja utilizat!");
                 return; 
             }
-
-            User user = rol switch
-            {
-                "Admin" => new Admin(email, password),
-                "Medic" => new Medic(email, password),
-                "Pacient" => new Pacient(email, password),
-                _ => null
-            };
-            clinica.AdaugaUtilizator(user);
             
-            MessageBox.Show("Account created successfully!");
+            Pacient nouPacient = new Pacient(email, password);
+            nouPacient.SetNume(nume);
+            
+            clinica.AdaugaUtilizator(nouPacient);
+            
+            MessageBox.Show($"Contul pacientului {nume} a fost creat cu succes!");
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
+
         public SignupForm(Clinica clinica)
         {
             this.clinica = clinica;
             InitializeUI();
-
-            foreach (var pacient in clinica.UtilizatoriReadOnly)
-            {
-                Console.WriteLine(pacient.Email);
-            }
         }
     }
 }

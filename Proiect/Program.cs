@@ -7,7 +7,8 @@ namespace Proiect
     {
         static void Main()
         {
-            Clinica clinica = new Clinica();
+            ILogger logger = new FileLogger();
+            Clinica clinica = new Clinica(logger);
             foreach (var user in clinica.UtilizatoriReadOnly)
             {
                 Console.WriteLine(user);

@@ -10,6 +10,8 @@ namespace Proiect;
         private const string FileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\utilizatori.json";
         private const string ServiciiFileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\servicii.json";
         private const string ProgramariFileName = @"F:\info\an_2\Proiect POO\Proiect\Proiect\programari.json";
+
+        private readonly ILogger _logger;
         
         public List<User> utilizatori = new List<User>();
         public List<ServiciuMedical> servicii = new List<ServiciuMedical>();
@@ -19,8 +21,10 @@ namespace Proiect;
         public List<Medic> Medici => utilizatori.Where(u => u is Medic).Cast<Medic>().ToList();
         public List<Pacient> Pacienti => utilizatori.Where(u => u is Pacient).Cast<Pacient>().ToList();
         
-        public Clinica()
+        public Clinica(ILogger logger)
         {
+            _logger = logger;
+            IncarcaProgramariDinFisier();
             IncarcaDinFisier();
             IncarcaServiciiDinFisier();
         }
@@ -72,12 +76,18 @@ namespace Proiect;
 
         public bool VerificareLogin(string email, string password)
         {
+            _logger.LogInfo($"Login incercat: {email}");
             email = email.Trim().ToLower();
             foreach (var user in utilizatori)
             {
                 if (user.Email.Trim().ToLower() == email && user.Password == password)
+                {
+                    _logger.LogInfo("Login reusit");
                     return true;
+                }
+                    
             }
+            _logger.LogInfo("Login incorect");
             return false;
         }
 
@@ -88,10 +98,12 @@ namespace Proiect;
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 string jsonString = JsonSerializer.Serialize(utilizatori, options);
                 File.WriteAllText(FileName, jsonString);
+                _logger.LogInfo("Utilizatori salvati in fisier");
             }
             catch (Exception ex)
             {
                 System.Windows.Forms.MessageBox.Show(ex.Message);
+                _logger.LogError("Eroare la salvare utilizatori: " + ex.Message);
             }
             
         }
@@ -106,8 +118,6 @@ namespace Proiect;
                 { 
                     PropertyNameCaseInsensitive = true 
                 };
-                
-                // Atributele [JsonDerivedType] din clasa User fac toata treaba aici:
                 utilizatori = JsonSerializer.Deserialize<List<User>>(jsonString, options) ?? new List<User>();
             }
             catch (Exception ex)
@@ -145,12 +155,9 @@ namespace Proiect;
     
             return false;
         }
-        
-        
-        
-
         public void AdaugaProgramare(Programare p)
         {
+            _logger.LogInfo($"Programare creata pentru {p.Pacient.Email}");
             programari.Add(p);
             SalvareProgramariInFisier();
         }

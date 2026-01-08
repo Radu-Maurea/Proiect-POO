@@ -18,5 +18,10 @@
     "Denumire": "Investigatii",
     "Pret": 500,
     "DurataMinute": 25
+  },
+  {
+    "Denumire": "Igienizare",
+    "Pret": 300,
+    "DurataMinute": 45
   }
 ]

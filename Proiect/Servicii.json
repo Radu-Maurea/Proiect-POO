@@ -23,5 +23,25 @@
     "Denumire": "Igienizare",
     "Pret": 300,
     "DurataMinute": 45
+  },
+  {
+    "Denumire": "Extragere Cosuri",
+    "Pret": 600,
+    "DurataMinute": 41
+  },
+  {
+    "Denumire": "Terapie ",
+    "Pret": 500,
+    "DurataMinute": 200
+  },
+  {
+    "Denumire": "1",
+    "Pret": 1,
+    "DurataMinute": 1
+  },
+  {
+    "Denumire": "a",
+    "Pret": 32,
+    "DurataMinute": 213
   }
 ]

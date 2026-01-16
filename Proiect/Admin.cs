@@ -27,9 +27,8 @@ public class Admin : User
             medicNou.SetSpecialitate(specialitate);
             medicNou.SetProgram(programLucru);
             medicNou.SetNume(nume);
-            medicNou.ServiciiOferite.Add(serviciu);
+            medicNou.AdaugaServiciu(serviciu);
             clinica.AdaugaUtilizator(medicNou);
-
             _logger.LogInfo($"Admin {Email} a adaugat un nou medic {medicNou.Nume}");
             return true;
         }
@@ -44,19 +43,12 @@ public class Admin : User
     {
         try
         {
-            if (clinica.ExistaEmail(email))
-            {
-                var user = clinica.utilizatori.FirstOrDefault(u => u.Email.Trim().ToLower() == email.Trim().ToLower() && u is Medic);
-
-                if (user != null)
-                {
-                    clinica.utilizatori.Remove(user);
-                    clinica.SalvareInFisier();
-                    _logger.LogInfo($"Admin {Email} a sters medicul {email}");
-                    return true;
-                }
-            }
-            return false;
+            clinica.StergeUtilizator(email);
+            var programare = clinica.ProgramariReadOnly.FirstOrDefault(p => p.Medic.Email == email);
+            if (programare != null) clinica.StergeProg(programare.DataOra + " || " + email);
+            _logger.LogInfo($"Admin {Email} a sters medicul {email}");
+            return true;
+                    
         }
         catch (Exception ex)
         {
@@ -69,16 +61,9 @@ public class Admin : User
     {
         try
         {
-            var medic = clinica.utilizatori.OfType<Medic>().FirstOrDefault(m => m.Email.Trim().ToLower() == email.Trim().ToLower());
-            if (medic != null)
-            {
-                medic.SetSpecialitate(specialitate);
-                medic.SetProgram(programLucru);
-                clinica.SalvareInFisier();
-                _logger.LogInfo($"Admin {Email} a modificat datele medicului {email}");
-                return true;
-            }
-            return false;
+            clinica.ModificaMedic(email, specialitate, programLucru);
+            _logger.LogInfo($"Admin {Email} a modificat datele medicului {email}");
+            return true;
         }
         catch (Exception ex)
         {
@@ -92,8 +77,7 @@ public class Admin : User
         try
         {
             ServiciuMedical nou = new ServiciuMedical(denumire, pret, durata);
-            clinica.servicii.Add(nou);
-            clinica.SalvareServiciiInFisier();
+            clinica.AdaugaServiciuMedical(nou);
             _logger.LogInfo($"Admin {Email} a adaugat serviciul {denumire}");
             return true;
         }
@@ -108,20 +92,9 @@ public class Admin : User
     {
         try
         {
-            var medic = clinica.Medici.FirstOrDefault(m => m.Email == emailMedic);
-            var serviciu = clinica.servicii.FirstOrDefault(s => s.Denumire == denumireServiciu);
-
-            if (medic != null && serviciu != null)
-            {
-                if (!medic.ServiciiOferite.Any(s => s.Denumire == denumireServiciu))
-                {
-                    medic.ServiciiOferite.Add(serviciu);
-                    clinica.SalvareInFisier();
-                    _logger.LogInfo($"Admin {Email} a asociat serviciul {denumireServiciu} medicului {emailMedic}");
-                    return true;
-                }
-            }
-            return false;
+            clinica.AsociazaServ(emailMedic, denumireServiciu);
+            _logger.LogInfo($"Admin {Email} a asociat serviciul {denumireServiciu} medicului {emailMedic}");
+            return true;
         }
         catch (Exception ex)
         {
@@ -134,26 +107,11 @@ public class Admin : User
     {
         try
         {
-            clinica.IncarcaProgramariDinFisier();
-            string[] parti = programare.Split(new[] { " || " }, StringSplitOptions.None);
-            if (parti.Length == 2)
-            {
-                string ora = parti[0];
-                string emailMedic = parti[1];
-                var deSters = clinica.programari.FirstOrDefault(p =>
-                    p.DataOra.Equals(ora) &&
-                    p.Medic.Email.Equals(emailMedic) &&
-                    p.Vazut == false);
-
-                if (deSters != null)
-                {
-                    clinica.programari.Remove(deSters);
-                    clinica.SalvareProgramariInFisier();
-                    _logger.LogInfo($"Admin {Email} a sters programarea de la ora {ora} a medicului {emailMedic}");
-                    return true;
-                }
-            }
-            return false;
+            clinica.StergeProg(programare);
+            var ora = programare.Split(new[] { " || " }, StringSplitOptions.None)[0];
+            var emailMedic = programare.Split(new[] { " || " }, StringSplitOptions.None)[1];
+            _logger.LogInfo($"Admin {Email} a sters programarea de la ora {ora} a medicului {emailMedic}");
+            return true;
         }
         catch (Exception ex)
         {
@@ -162,12 +120,12 @@ public class Admin : User
         }
     }
 
-    // Metodele de vizualizare raman neschimbate (fara logare) conform solicitarii tale
+    
     public string VeziProgramari()
     {
         string sb = "";
-        clinica.IncarcaProgramariDinFisier();
-        foreach (var programare in clinica.programari)
+        clinica.IncarcaDate();
+        foreach (var programare in clinica.ProgramariReadOnly)
         {
             if (!programare.Vazut)
                 sb += programare.ToString() + Environment.NewLine;
@@ -178,8 +136,8 @@ public class Admin : User
     public string VeziProgramariDiagnosticate()
     {
         string sb = "";
-        clinica.IncarcaProgramariDinFisier();
-        foreach (var programare in clinica.programari)
+        clinica.IncarcaDate();
+        foreach (var programare in clinica.ProgramariReadOnly)
         {
             if (programare.Vazut)
                 sb += programare.ToString() + " Diagnostic: " + programare.Diagnostic + Environment.NewLine;
@@ -187,10 +145,10 @@ public class Admin : User
         return sb;
     }
 
-    public int NumarProgramari() => clinica.programari.Count;
+    public int NumarProgramari() => clinica.ProgramariReadOnly.Count;
     public int NumarMedici() => clinica.Medici.Count;
-    public int NumarServicii() => clinica.servicii.Count;
-    public int NumarProgramariDiagnosticate() => clinica.programari.Count(p => p.Vazut);
-    public int NumarProgramariInProgres() => clinica.programari.Count(p => !p.Vazut);
-    public int NumarConturi() => clinica.utilizatori.Count;
+    public int NumarServicii() => clinica.ServiciiReadOnly.Count;
+    public int NumarProgramariDiagnosticate() => clinica.ProgramariReadOnly.Count(p => p.Vazut);
+    public int NumarProgramariInProgres() => clinica.ProgramariReadOnly.Count(p => !p.Vazut);
+    public int NumarConturi() => clinica.UtilizatoriReadOnly.Count;
 }

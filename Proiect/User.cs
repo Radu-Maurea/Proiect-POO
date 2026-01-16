@@ -8,9 +8,12 @@ namespace Proiect;
 
 public abstract class User
 {
-    public Guid Id { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
+    [JsonInclude]
+    public Guid Id { get; protected set; }
+    [JsonInclude]
+    public string Email { get; protected set; }
+    [JsonInclude]
+    public string Password { get; protected set; }
 
     protected User(string email, string password)
     {

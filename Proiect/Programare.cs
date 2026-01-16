@@ -1,12 +1,19 @@
-﻿namespace Proiect;
+﻿using System.Text.Json.Serialization;
+namespace Proiect;
 
 public class Programare
 {
-    public Medic Medic { get; set; }
-    public Pacient Pacient { get; set; }
-    public ServiciuMedical Serviciu { get; set; }
-    public string DataOra { get; set; }
-    public string Diagnostic { get; set; }
+    [JsonInclude]
+    public Medic Medic { get; private set; }
+    [JsonInclude]
+    public Pacient Pacient { get; private set; }
+    [JsonInclude]
+    public ServiciuMedical Serviciu { get; private set; }
+    [JsonInclude]
+    public string DataOra { get; private set; }
+    [JsonInclude]
+    public string Diagnostic { get; private set; }
+    [JsonInclude]
     public bool Vazut { get; set; }
     public Programare(Medic medic, Pacient pacient, ServiciuMedical serviciu, string dataOra)
     {

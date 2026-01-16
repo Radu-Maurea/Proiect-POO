@@ -1,11 +1,12 @@
-﻿namespace Proiect;
+﻿using System.Text.Json.Serialization;
+namespace Proiect;
 
 public class Pacient : User
 {
     private Clinica clinica;
     private ILogger _logger;
     public Pacient(string email, string password) : base(email, password){}
-    public string Nume { get; set; }
+    [JsonInclude] public string Nume { get; private set; }
     
     public void SetClinica(Clinica clinica) => this.clinica = clinica;
     
@@ -68,15 +69,16 @@ public class Pacient : User
         catch(Exception ex) 
         { 
             _logger?.LogError($"[EROARE PROGRAMARE] Eșec la crearea programării pentru {Email}: {ex.Message}");
-            return false; 
+            throw;
         }
     }
+    
 
     public string VeziProgramari(string email)
     {
-        clinica.IncarcaProgramariDinFisier();
+        clinica.IncarcaDate();
         string sb = "";
-        foreach (var programare in clinica.programari)
+        foreach (var programare in clinica.ProgramariReadOnly)
         {
             if (programare.Pacient.Email == email && programare.Vazut == false)
                 sb += programare.ToString() + Environment.NewLine;
@@ -88,23 +90,11 @@ public class Pacient : User
     {
         try 
         {
-            clinica.IncarcaProgramariDinFisier();
-            string[] parti = programare.Split(new[] { " || " }, StringSplitOptions.None);
-            if (parti.Length == 2)
-            {
-                string ora = parti[0];
-                string emailMedic = parti[1];
-                
-                var deSters = clinica.programari.FirstOrDefault(p=> p.DataOra.Equals(ora) && p.Medic.Email.Equals(emailMedic));
-                if (deSters != null)
-                {
-                    clinica.programari.Remove(deSters);
-                    clinica.SalvareProgramariInFisier();
-                    _logger?.LogInfo($"[ANULARE] Pacientul {Email} a anulat programarea de la {ora} cu medicul {emailMedic}.");
-                    return true;
-                }
-            }
-            return false;
+            clinica.StergeProg(programare);
+            var ora = programare.Split(new[] { " || " }, StringSplitOptions.None)[0];
+            var emailMedic = programare.Split(new[] { " || " }, StringSplitOptions.None)[1];
+            _logger?.LogInfo($"[ANULARE] Pacientul {Email} a anulat programarea de la {ora} cu medicul {emailMedic}.");
+            return true;
         }
         catch (Exception ex)
         {

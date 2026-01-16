@@ -1,22 +1,22 @@
 [
   {
     "$type": "Admin",
-    "Id": "ee42a6d9-1eb6-4cb7-b193-653e87755c27",
+    "Id": "585ce851-7cd8-40f8-927e-c75ef4bec713",
     "Email": "teodosie",
     "Password": "1"
   },
   {
     "$type": "Pacient",
     "Nume": "Maurea Radu",
-    "Id": "f80c12e8-9da9-4805-ad0a-de5c8a5fd38e",
-    "Email": "radumaurea@gmail.com",
+    "Id": "0a4d36ac-cbea-457a-b0db-c03cb019ae8c",
+    "Email": "radu@gmail.com",
     "Password": "123"
   },
   {
     "$type": "Medic",
-    "Specialitate": "Cardiologie",
-    "ProgramLucru": "10:00-18:00",
-    "Nume": "Maurea Alina",
+    "Specialitate": "Neurologie",
+    "ProgramLucru": "00:00-06:00",
+    "Nume": "Bako Olivia",
     "ServiciiOferite": [
       {
         "Denumire": "Analize Medicale",
@@ -27,10 +27,88 @@
         "Denumire": "Consult",
         "Pret": 250,
         "DurataMinute": 30
+      },
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
       }
     ],
-    "Id": "1192900c-186a-44bb-989a-2f758de058fe",
-    "Email": "alinamaurea@yahoo.com",
+    "ServiciiOferiteReadOnly": [
+      {
+        "Denumire": "Analize Medicale",
+        "Pret": 500,
+        "DurataMinute": 10
+      },
+      {
+        "Denumire": "Consult",
+        "Pret": 250,
+        "DurataMinute": 30
+      },
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      }
+    ],
+    "Id": "14c59572-cb90-497c-bcdf-80e997b4c8ca",
+    "Email": "olivia@gmail.com",
+    "Password": "1"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": "Neurologie",
+    "ProgramLucru": "18:00-12:00",
+    "Nume": "Lupu Vlad",
+    "ServiciiOferite": [
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      },
+      {
+        "Denumire": "Consult",
+        "Pret": 250,
+        "DurataMinute": 30
+      }
+    ],
+    "ServiciiOferiteReadOnly": [
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      },
+      {
+        "Denumire": "Consult",
+        "Pret": 250,
+        "DurataMinute": 30
+      }
+    ],
+    "Id": "76c2836a-9d1d-4701-bd04-b9e2f33392cc",
+    "Email": "lupu@gmail.com",
     "Password": "doc1"
+  },
+  {
+    "$type": "Medic",
+    "Specialitate": "Cardiologie",
+    "ProgramLucru": "10:00-18:00",
+    "Nume": "Mihai Petre",
+    "ServiciiOferite": [
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      }
+    ],
+    "ServiciiOferiteReadOnly": [
+      {
+        "Denumire": "Operatie",
+        "Pret": 500,
+        "DurataMinute": 1
+      }
+    ],
+    "Id": "d27ea49f-eabd-4901-83a0-e60c0b71ca95",
+    "Email": "mihai@gmail.com",
+    "Password": "1"
   }
 ]

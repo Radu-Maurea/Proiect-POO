@@ -2,39 +2,54 @@
 using System.Drawing; 
 using System.Windows.Forms;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Proiect;
 
 public class AdminForm : Form
 {
-    private Admin admin;
-    private ILogger logger;
-    private Clinica clinica;
+    // Dependinte injectate prin Generic Host
+    private readonly Clinica _clinica;
+    private readonly ILogger _logger;
+    private readonly IServiceProvider _serviceProvider;
+    
    
-    private TextBox txtDisplay,txtStergeEmail,txtDenumireServiciu, txtPretServiciu, txtDurataServiciu, txtListaServicii,txtProgrmari,txtProgramari2;
+    private Admin _admin;
+   
+    private TextBox txtDisplay, txtStergeEmail, txtDenumireServiciu, txtPretServiciu, txtDurataServiciu, txtListaServicii, txtProgrmari, txtProgramari2;
     private TextBox txtStatConturi, txtStatMedici, txtStatServicii, txtStatProgTotal, txtStatProgDiag, txtStatProgInProgres;
     private TextBox txtAdaugEmail, txtNumeMedic, txtAdaugPass;
     
     private Panel panelAdaugare, panelStergere, panelModifica, panelServicii, panelAsociere, panelVeziServicii;
-    private Panel panelProgrmari,panelStatistici,panelStergereProgramare;
+    private Panel panelProgrmari, panelStatistici, panelStergereProgramare;
     
     private ComboBox cmbSpecializari, cmbProgram;
-    private ComboBox cmbSelectieEmail, cmbModificaSpecializari, cmbModificaProgram,cmbAsociereMedici, cmbAsociereServicii,cmbSelectieStergereProg,cmbSpec;
+    private ComboBox cmbSelectieEmail, cmbModificaSpecializari, cmbModificaProgram, cmbAsociereMedici, cmbAsociereServicii, cmbSelectieStergereProg, cmbSpec;
     
     private Button btnConfirmaStergereProg;
 
-    public AdminForm(Clinica clinica, Admin admin)
+    private readonly AuthService _authService;
+    public AdminForm(Clinica clinica, ILogger logger, IServiceProvider serviceProvider ,AuthService authService)
     {
-        this.clinica = clinica;
-        logger = new FileLogger();
-        this.admin = admin;
+        _clinica = clinica;
+        _logger = logger;
+        _serviceProvider = serviceProvider;
+        _authService = authService;
+
+        _admin = (Admin)_authService.CurrentUser;
+        _admin.SetClinica(_clinica, _logger);
         InitializeUI();
     }
+    
+    // public void SetLoggedAdmin(Admin admin) //Face legatura intre Admin si interfata
+    // {
+    //     _admin = admin;
+    //     _admin.SetClinica(_clinica, _logger);
+    //     InitializeUI();
+    // }
 
     public void InitializeUI()
     {
-        admin.SetClinica(clinica,logger);
-
         this.Text = "Admin Panel";
         this.Width = 800;
         this.Height = 750;
@@ -43,14 +58,13 @@ public class AdminForm : Form
 
         Panel headerPanel = new Panel { BackColor = Color.DarkBlue, Dock = DockStyle.Top, Height = 80 };
         Label lbl = new Label {
-            Text = $"Autentificat ca: {admin.Email}",
+            Text = $"Autentificat ca: {_admin.Email}", // Folosim _admin
             ForeColor = Color.White, Font = new Font("Segoe UI", 12, FontStyle.Bold),
             Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter
         };
         headerPanel.Controls.Add(lbl);
 
         Panel sidePanel = new Panel { BackColor = Color.FromArgb(45, 45, 48), Dock = DockStyle.Left, Width = 180 };
-
         Panel mainContentPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
         txtDisplay = new TextBox {
@@ -136,17 +150,17 @@ public class AdminForm : Form
         if (controlActiv == panelModifica) 
         {
             cmbSelectieEmail.Items.Clear();
-            foreach (var u in clinica.UtilizatoriReadOnly.Where(x => x.Rol() == "Medic"))
+            foreach (var u in _clinica.UtilizatoriReadOnly.Where(x => x.Rol() == "Medic"))
                 cmbSelectieEmail.Items.Add(u.Email);
         }
         else if (controlActiv == panelAsociere) 
         {
             cmbAsociereMedici.Items.Clear();
-            foreach (var m in clinica.Medici)
+            foreach (var m in _clinica.Medici)
                 cmbAsociereMedici.Items.Add($"{m.Nume} | {m.Email}");
 
             cmbAsociereServicii.Items.Clear();
-            foreach (var s in clinica.servicii)
+            foreach (var s in _clinica.ServiciiReadOnly)
                 cmbAsociereServicii.Items.Add(s.Denumire);
         }
         else if (controlActiv == panelVeziServicii)
@@ -154,35 +168,35 @@ public class AdminForm : Form
             txtListaServicii.Clear();
             txtListaServicii.AppendText("Servicii Medicale Disponibile:" + Environment.NewLine);
             txtListaServicii.AppendText("--------------------------------------" + Environment.NewLine);
-            foreach (var s in clinica.servicii)
+            foreach (var s in _clinica.ServiciiReadOnly)
                 txtListaServicii.AppendText($"Denumire: {s.Denumire} | Pret: {s.Pret} RON | Durata: {s.DurataMinute} min" + Environment.NewLine);
         }
         else if (controlActiv == txtDisplay) 
         {
             txtDisplay.Clear();
             txtDisplay.AppendText("Utilizatori in sistem:" + Environment.NewLine);
-            foreach (var u in clinica.UtilizatoriReadOnly)
+            foreach (var u in _clinica.UtilizatoriReadOnly)
                 txtDisplay.AppendText($"[{u.Rol()}] - {u.Email}" + Environment.NewLine);
         }
         else if (controlActiv == panelProgrmari)
         {
             txtProgrmari.Clear();
             txtProgramari2.Clear();
-            txtProgrmari.Text = admin.VeziProgramari();
-            txtProgramari2.Text = admin.VeziProgramariDiagnosticate();
+            txtProgrmari.Text = _admin.VeziProgramari();
+            txtProgramari2.Text = _admin.VeziProgramariDiagnosticate();
         }
         else if (controlActiv == panelStergereProgramare)
             ActualizareListaStergereAdmin();
         
         else if (controlActiv == panelStatistici)
         {
-            clinica.IncarcaProgramariDinFisier();
-            txtStatConturi.Text = admin.NumarConturi().ToString();
-            txtStatMedici.Text = admin.NumarMedici().ToString();
-            txtStatServicii.Text = admin.NumarServicii().ToString();
-            txtStatProgTotal.Text = admin.NumarProgramari().ToString();
-            txtStatProgDiag.Text = admin.NumarProgramariDiagnosticate().ToString();
-            txtStatProgInProgres.Text = admin.NumarProgramariInProgres().ToString();
+            _clinica.IncarcaDate();
+            txtStatConturi.Text = _admin.NumarConturi().ToString();
+            txtStatMedici.Text = _admin.NumarMedici().ToString();
+            txtStatServicii.Text = _admin.NumarServicii().ToString();
+            txtStatProgTotal.Text = _admin.NumarProgramari().ToString();
+            txtStatProgDiag.Text = _admin.NumarProgramariDiagnosticate().ToString();
+            txtStatProgInProgres.Text = _admin.NumarProgramariInProgres().ToString();
         }
 
         controlActiv.Visible = true;
@@ -204,7 +218,7 @@ public class AdminForm : Form
         cmbProgram.SelectedIndex = 0;
         
         cmbSpec = new ComboBox { Top = 220, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        foreach (var s in clinica.servicii) cmbSpec.Items.Add(s.Denumire);
+        foreach (var s in _clinica.ServiciiReadOnly) cmbSpec.Items.Add(s.Denumire);
         
         Button btn = new Button { Text = "Salvează", Top = 260, Left = 120, BackColor = Color.LightGreen };
         btn.Click += BtnSalveazaMedic_Click;
@@ -221,23 +235,23 @@ public class AdminForm : Form
 
     private void BtnSalveazaMedic_Click(object sender, EventArgs e) 
     {
-        string emailIntrodus = admin.Email;
+        string emailIntrodus = _admin.Email;
         
         if (string.IsNullOrWhiteSpace(txtAdaugEmail.Text) || string.IsNullOrWhiteSpace(txtNumeMedic.Text) ||
             string.IsNullOrWhiteSpace(txtAdaugPass.Text))
         {
             MessageBox.Show("Completati toate campurile!"); 
-            logger?.LogWarning($"[EROARE] Încercare adăugare medic cu date incomplete. Email='{emailIntrodus}'");
+            _logger?.LogWarning($"[EROARE] Încercare adăugare medic cu date incomplete. Email='{emailIntrodus}'");
             return;
             
         }
         if (cmbSpec.SelectedItem == null) { MessageBox.Show("Selectati un serviciu!"); return; }
-        else if (clinica.Medici.Any(m => m.Email == txtAdaugEmail.Text)) { MessageBox.Show("Emailul este deja folosit!"); return; }
-        else if (clinica.Medici.Any(m => m.Nume == txtNumeMedic.Text)) { MessageBox.Show("Numele este deja folosit!"); return; }
+        else if (_clinica.Medici.Any(m => m.Email == txtAdaugEmail.Text)) { MessageBox.Show("Emailul este deja folosit!"); return; }
+        else if (_clinica.Medici.Any(m => m.Nume == txtNumeMedic.Text)) { MessageBox.Show("Numele este deja folosit!"); return; }
         
         string denumireSelectata = cmbSpec.SelectedItem.ToString();
-        ServiciuMedical serviciu = clinica.servicii.FirstOrDefault(s => s.Denumire == denumireSelectata);
-        if (admin.AdaugaMedic(txtAdaugEmail.Text, txtNumeMedic.Text, txtAdaugPass.Text,cmbSpecializari.SelectedItem.ToString(), cmbProgram.SelectedItem.ToString(),serviciu))
+        ServiciuMedical serviciu = _clinica.ServiciiReadOnly.FirstOrDefault(s => s.Denumire == denumireSelectata);
+        if (_admin.AdaugaMedic(txtAdaugEmail.Text, txtNumeMedic.Text, txtAdaugPass.Text, cmbSpecializari.SelectedItem.ToString(), cmbProgram.SelectedItem.ToString(), serviciu))
         {
             MessageBox.Show("Succes!");
             txtAdaugEmail.Clear(); txtNumeMedic.Clear(); txtAdaugPass.Clear();
@@ -248,7 +262,7 @@ public class AdminForm : Form
         panelStergere = new Panel { Dock = DockStyle.Fill, Visible = false };
         txtStergeEmail = new TextBox { Top = 20, Left = 120, Width = 200 };
         Button btn = new Button { Text = "Șterge", Top = 60, Left = 120, BackColor = Color.Red, ForeColor = Color.White };
-        btn.Click += (s, e) => { if(admin.StergeMedic(txtStergeEmail.Text)) MessageBox.Show("Șters!"); };
+        btn.Click += (s, e) => { if(_admin.StergeMedic(txtStergeEmail.Text)) MessageBox.Show("Șters!"); };
         panelStergere.Controls.AddRange(new Control[] { new Label { Text = "Email:", Top = 20, Left = 10 }, txtStergeEmail, btn });
     }
 
@@ -258,11 +272,11 @@ public class AdminForm : Form
         cmbModificaSpecializari = new ComboBox { Top = 60, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
         cmbModificaSpecializari.Items.AddRange(new object[] { "Cardiologie", "Dermatologie", "Neurologie", "Pediatrie" });
         cmbModificaProgram = new ComboBox { Top = 100, Left = 120, Width = 200, DropDownStyle = ComboBoxStyle.DropDownList };
-        cmbModificaProgram.Items.AddRange(new object[] { "10:00 - 18:00", "18:00-12:00", "12:00-06:00" });
+        cmbModificaProgram.Items.AddRange(new object[] { "10:00-18:00", "18:00-12:00", "00:00-06:00" });
         
         Button btn = new Button { Text = "Modifică", Top = 150, Left = 120, BackColor = Color.LightSkyBlue };
         btn.Click += (s, e) => {
-            if (admin.ModificaMedic(cmbSelectieEmail.Text, cmbModificaSpecializari.Text, cmbModificaProgram.Text))
+            if (_admin.ModificaMedic(cmbSelectieEmail.Text, cmbModificaSpecializari.Text, cmbModificaProgram.Text))
                 MessageBox.Show("Actualizat!");
         };
         panelModifica.Controls.AddRange(new Control[] { 
@@ -288,7 +302,7 @@ public class AdminForm : Form
 
     private void BtnSalveazaServiciu_Click(object sender, EventArgs e) {
         if (decimal.TryParse(txtPretServiciu.Text, out decimal p) && int.TryParse(txtDurataServiciu.Text, out int d)) {
-            if (admin.AdaugaServiciu(txtDenumireServiciu.Text, p, d)) {
+            if (_admin.AdaugaServiciu(txtDenumireServiciu.Text, p, d)) {
                 MessageBox.Show("Serviciu salvat!");
                 txtDenumireServiciu.Clear(); txtPretServiciu.Clear(); txtDurataServiciu.Clear();
             }
@@ -303,7 +317,7 @@ public class AdminForm : Form
         btn.Click += (s, e) => {
             if (cmbAsociereMedici.SelectedItem != null && cmbAsociereServicii.SelectedItem != null) {
                 string email = cmbAsociereMedici.Text.Split('|')[1].Trim();
-                if (admin.AsociazaServiciuMedic(email, cmbAsociereServicii.Text)) MessageBox.Show("Asociat!");
+                if (_admin.AsociazaServiciuMedic(email, cmbAsociereServicii.Text)) MessageBox.Show("Asociat!");
             }
         };
         panelAsociere.Controls.AddRange(new Control[] { 
@@ -322,8 +336,8 @@ public class AdminForm : Form
     {
         panelProgrmari = new Panel { Dock = DockStyle.Fill, Visible = false };
         Label lbl = new Label { Text = "Istoric Programari:", Top = 20, Left = 10 };
-        txtProgrmari = new TextBox { Top = 50, Left = 10, Width = 600, Height = 200,Multiline = true, ReadOnly = true,ScrollBars = ScrollBars.Vertical};
-        txtProgramari2 = new TextBox{Top = 280, Left = 10, Width = 600, Height = 200,Multiline = true, ReadOnly = true,ScrollBars = ScrollBars.Vertical};
+        txtProgrmari = new TextBox { Top = 50, Left = 10, Width = 600, Height = 200, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical };
+        txtProgramari2 = new TextBox{ Top = 280, Left = 10, Width = 600, Height = 200, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical };
         panelProgrmari.Controls.AddRange(new Control[] { lbl, txtProgrmari, new Label { Text = "Programari Diagnosticate:", Top = 250, Left = 10 }, txtProgramari2});
     }
     
@@ -360,20 +374,24 @@ public class AdminForm : Form
     private void ActualizareListaStergereAdmin()
     {
         cmbSelectieStergereProg.Items.Clear();
-        clinica.IncarcaProgramariDinFisier(); 
-        foreach (var prog in clinica.programari.Where(p => !p.Vazut))
+        _clinica.IncarcaDate(); 
+        foreach (var prog in _clinica.ProgramariReadOnly.Where(p => !p.Vazut))
             cmbSelectieStergereProg.Items.Add($"{prog.DataOra} || {prog.Medic.Email}");
     }
 
+    
     private void ExecutaStergereProgramare(string infoProgramare)
     {
         if (MessageBox.Show("Sunteți sigur?", "Confirmare", MessageBoxButtons.YesNo) == DialogResult.Yes)
         {
-            if (admin.StergeProgramare(infoProgramare)) { MessageBox.Show("Succes!"); ActualizareListaStergereAdmin(); }
+            if (_admin.StergeProgramare(infoProgramare)) { MessageBox.Show("Succes!"); ActualizareListaStergereAdmin();}
         }
     }
 
     private void btnLogout_Click(object sender, EventArgs e) {
-        this.Hide(); new MainForm().Show(); this.Close();
+        _authService.Logout();
+        var mainFomr = _serviceProvider.GetRequiredService<MainForm>();
+        mainFomr.Show();
+        Hide();
     }
 }
